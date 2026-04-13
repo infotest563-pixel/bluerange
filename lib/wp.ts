@@ -72,7 +72,7 @@ export async function getPostBySlug(slug: string) {
 
 export async function getMenu(slug: string) {
     try {
-        const res = await fetch(`${WP}/wp-json/headless/v1/menus/${slug}?lang=en`, { next: { revalidate: 300 } });
+        const res = await fetch(`${WP}/wp-json/headless/v1/menus/${slug}`, { next: { revalidate: 300 } });
         if (!res.ok) return [];
         const data = await res.json();
         return Array.isArray(data) ? data : [];
