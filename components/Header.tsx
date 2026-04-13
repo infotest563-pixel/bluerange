@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getMenu, getSite, getSettings } from '../lib/wp';
 import DeskToggle from './DeskToggle';
+import NavMenu from './NavMenu';
 
 const WP_HOST = 'https://dev-bluerange.pantheonsite.io';
 
@@ -135,59 +136,10 @@ export default async function Header() {
                             )}
                         </Link>
 
-                        <button
-                            className="navbar-toggler"
-                            type="button"
-                            data-toggle="collapse"
-                            data-target="#navbarNavDropdown"
-                            aria-controls="navbarNavDropdown"
-                            aria-expanded="false"
-                            aria-label="Toggle navigation"
-                        >
-                            <span className="navbar-toggler-icon"></span>
-                        </button>
-
-                        <div className="collapse navbar-collapse" id="navbarNavDropdown">
-                            <ul className="navbar-nav ml-auto" id="main-menu">
-                                {Array.isArray(menuItems) && menuItems.map((item: any) => {
-                                    const hasChildren = item.children && item.children.length > 0;
-                                    const liClasses = ['nav-item'];
-
-                                    // Add WordPress specific classes if available
-                                    if (item.classes) {
-                                        if (Array.isArray(item.classes)) liClasses.push(...item.classes);
-                                    }
-
-                                    if (hasChildren) liClasses.push('dropdown');
-
-                                    return (
-                                        <li key={item.id} className={liClasses.join(' ')}>
-                                            <Link
-                                                href={resolveUrl(item.url)}
-                                                className={`nav-link ${hasChildren ? 'dropdown-toggle' : ''}`}
-                                                {...(hasChildren ? {
-                                                    'data-toggle': 'dropdown',
-                                                    'aria-haspopup': 'true',
-                                                    'aria-expanded': 'false',
-                                                    'id': `dropdown-target-${item.id}`
-                                                } : {})}
-                                            >
-                                                <span dangerouslySetInnerHTML={{ __html: replaceFlagImages(item.title) }} />
-                                            </Link>
-                                            {hasChildren && (
-                                                <div className="dropdown-menu" aria-labelledby={`dropdown-target-${item.id}`}>
-                                                    {item.children.map((child: any) => (
-                                                        <Link key={child.id} href={resolveUrl(child.url)} className="dropdown-item">
-                                                            <span dangerouslySetInnerHTML={{ __html: replaceFlagImages(child.title) }} />
-                                                        </Link>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-                        </div>
+                        <NavMenu
+                            menuItems={menuItems}
+                            wpHost={WP_HOST}
+                        />
 
                         <DeskToggle />
 
