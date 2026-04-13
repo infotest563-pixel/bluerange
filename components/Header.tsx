@@ -64,9 +64,6 @@ export default async function Header() {
                                             <span>Support@bluerange.se</span>
                                         </a>
                                     </li>
-                                    <li style={{ display: 'flex', alignItems: 'center' }}>
-                                        <LanguageSwitcher />
-                                    </li>
                                 </ul>
                             </div>
                         </div>
