@@ -7,6 +7,19 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "img-src 'self' data: https: blob:;",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -146,7 +146,7 @@ export default async function Header() {
                                                 <div className="dropdown-menu" aria-labelledby={`dropdown-target-${item.id}`}>
                                                     {item.children.map((child: any) => (
                                                         <Link key={child.id} href={resolveUrl(child.url)} className="dropdown-item">
-                                                            {child.title}
+                                                            <span dangerouslySetInnerHTML={{ __html: child.title }} />
                                                         </Link>
                                                     ))}
                                                 </div>
