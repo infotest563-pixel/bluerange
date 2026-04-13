@@ -72,7 +72,7 @@ function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
             <Link
                 href={resolveUrl(item.url, wpHost)}
                 className={`nav-link${hasChildren ? ' dropdown-toggle' : ''}`}
-                onClick={hasChildren ? (e) => { e.preventDefault(); setOpen(o => !o); } : undefined}
+                onClick={hasChildren ? (e: React.MouseEvent) => { e.preventDefault(); setOpen((o: boolean) => !o); } : undefined}
                 aria-expanded={hasChildren ? open : undefined}
             >
                 <span dangerouslySetInnerHTML={{ __html: replaceFlagImages(item.title) }} />
@@ -106,7 +106,7 @@ export default function NavMenu({ menuItems, wpHost }: NavMenuProps) {
                 aria-controls="navbarNavDropdown"
                 aria-expanded={mobileOpen}
                 aria-label="Toggle navigation"
-                onClick={() => setMobileOpen(o => !o)}
+                onClick={() => setMobileOpen((o: boolean) => !o)}
             >
                 <span className="navbar-toggler-icon"></span>
             </button>
