@@ -28,19 +28,50 @@ const langFlagMap: Record<string, string> = {
     suomi: 'fi',
 };
 
-function replaceFlagImages(html: string): string {
-    return html.replace(
-        /<img[^>]*src="data:image[^"]*"[^>]*\/?>/gi,
-        (match) => {
-            const altMatch = match.match(/alt="([^"]*)"/i);
-            const alt = altMatch ? altMatch[1] : '';
-            const code = langFlagMap[alt.toLowerCase()];
-            if (code) {
-                return `<img src="https://flagcdn.com/w20/${code}.png" srcset="https://flagcdn.com/w40/${code}.png 2x" width="16" height="11" alt="${alt}" style="width:16px;height:11px;vertical-align:middle;" />`;
-            }
-            return alt ? `<span style="font-size:12px;">${alt}</span>` : '';
-        }
-    );
+// Decode HTML entities like &amp; &lt; &#039; etc.
+function decodeEntities(str: string): string {
+    return str
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#039;/g, "'")
+        .replace(/\\u003c/gi, '<')
+        .replace(/\\u003e/gi, '>');
+}
+
+// Returns { flagUrl, label } if title contains a flag image, else null
+function parseFlagTitle(rawTitle: string): { flagUrl: string; label: string } | null {
+    const decoded = decodeEntities(rawTitle);
+    // Match base64 img tag and extract alt
+    const imgMatch = decoded.match(/<img[^>]*src="data:image[^"]*"[^>]*>/i);
+    if (!imgMatch) return null;
+    const altMatch = imgMatch[0].match(/alt="([^"]*)"/i);
+    const alt = altMatch ? altMatch[1] : '';
+    const code = langFlagMap[alt.toLowerCase()];
+    if (!code) return null;
+    return {
+        flagUrl: `https://flagcdn.com/w40/${code}.png`,
+        label: alt,
+    };
+}
+
+function MenuTitle({ title }: { title: string }) {
+    const flag = parseFlagTitle(title);
+    if (flag) {
+        return (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+                src={flag.flagUrl}
+                alt={flag.label}
+                width={22}
+                height={15}
+                style={{ width: '22px', height: '15px', verticalAlign: 'middle', display: 'inline-block' }}
+            />
+        );
+    }
+    // Plain text title — safe to render as HTML for any WP formatting
+    return <span dangerouslySetInnerHTML={{ __html: title }} />;
 }
 
 function resolveUrl(url: string, wpHost: string): string {
@@ -75,7 +106,7 @@ function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
                 onClick={hasChildren ? (e: React.MouseEvent) => { e.preventDefault(); setOpen((o: boolean) => !o); } : undefined}
                 aria-expanded={hasChildren ? open : undefined}
             >
-                <span dangerouslySetInnerHTML={{ __html: replaceFlagImages(item.title) }} />
+                <MenuTitle title={item.title} />
             </Link>
             {hasChildren && (
                 <div className={`dropdown-menu${open ? ' show' : ''}`}>
@@ -86,7 +117,7 @@ function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
                             className="dropdown-item"
                             onClick={() => setOpen(false)}
                         >
-                            <span dangerouslySetInnerHTML={{ __html: replaceFlagImages(child.title) }} />
+                            <MenuTitle title={child.title} />
                         </Link>
                     ))}
                 </div>
