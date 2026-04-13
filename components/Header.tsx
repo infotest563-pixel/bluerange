@@ -56,20 +56,18 @@ export default async function Header() {
     };
 
     const replaceFlagImages = (html: string): string => {
-        // Match <img> tags that contain a base64 src (any attribute order)
+        // Match any <img> that has a base64 src — extract alt from anywhere in the tag
         return html.replace(
-            /<img([^>]*)>/gi,
-            (fullMatch, attrs) => {
-                if (!attrs.includes('data:image')) return fullMatch;
-                // Extract alt attribute value
-                const altMatch = attrs.match(/alt="([^"]*)"/i);
+            /<img[^>]*src="data:image[^"]*"[^>]*\/?>/gi,
+            (match) => {
+                const altMatch = match.match(/alt="([^"]*)"/i);
                 const alt = altMatch ? altMatch[1] : '';
                 const code = langFlagMap[alt.toLowerCase()];
                 if (code) {
                     return `<img src="https://flagcdn.com/w20/${code}.png" srcset="https://flagcdn.com/w40/${code}.png 2x" width="16" height="11" alt="${alt}" style="width:16px;height:11px;vertical-align:middle;" />`;
                 }
-                // No alt match — try to detect language from surrounding text or hide
-                return `<span style="font-size:12px;">${alt || '🌐'}</span>`;
+                // Fallback: show the alt text as a label
+                return alt ? `<span style="font-size:12px;">${alt}</span>` : '';
             }
         );
     };
