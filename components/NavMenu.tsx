@@ -13,20 +13,47 @@ interface MenuItem {
 
 interface NavMenuProps {
     menuItems: MenuItem[];
-    replaceFlagImages: (html: string) => string;
-    resolveUrl: (url: string) => string;
+    wpHost: string;
 }
 
-function DropdownItem({ item, resolveUrl, replaceFlagImages }: {
-    item: MenuItem;
-    resolveUrl: (url: string) => string;
-    replaceFlagImages: (html: string) => string;
-}) {
+const langFlagMap: Record<string, string> = {
+    svenska: 'se',
+    english: 'gb',
+    norsk: 'no',
+    dansk: 'dk',
+    deutsch: 'de',
+    français: 'fr',
+    español: 'es',
+    finnish: 'fi',
+    suomi: 'fi',
+};
+
+function replaceFlagImages(html: string): string {
+    return html.replace(
+        /<img[^>]*src="data:image[^"]*"[^>]*\/?>/gi,
+        (match) => {
+            const altMatch = match.match(/alt="([^"]*)"/i);
+            const alt = altMatch ? altMatch[1] : '';
+            const code = langFlagMap[alt.toLowerCase()];
+            if (code) {
+                return `<img src="https://flagcdn.com/w20/${code}.png" srcset="https://flagcdn.com/w40/${code}.png 2x" width="16" height="11" alt="${alt}" style="width:16px;height:11px;vertical-align:middle;" />`;
+            }
+            return alt ? `<span style="font-size:12px;">${alt}</span>` : '';
+        }
+    );
+}
+
+function resolveUrl(url: string, wpHost: string): string {
+    if (!url) return '#';
+    if (url.startsWith(wpHost)) return url.replace(wpHost, '') || '/';
+    return url;
+}
+
+function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLLIElement>(null);
-    const hasChildren = item.children && item.children.length > 0;
+    const hasChildren = !!(item.children && item.children.length > 0);
 
-    // Close on outside click
     useEffect(() => {
         const handler = (e: MouseEvent) => {
             if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -43,7 +70,7 @@ function DropdownItem({ item, resolveUrl, replaceFlagImages }: {
     return (
         <li ref={ref} className={liClasses.join(' ')}>
             <Link
-                href={resolveUrl(item.url)}
+                href={resolveUrl(item.url, wpHost)}
                 className={`nav-link${hasChildren ? ' dropdown-toggle' : ''}`}
                 onClick={hasChildren ? (e) => { e.preventDefault(); setOpen(o => !o); } : undefined}
                 aria-expanded={hasChildren ? open : undefined}
@@ -55,7 +82,7 @@ function DropdownItem({ item, resolveUrl, replaceFlagImages }: {
                     {item.children!.map((child) => (
                         <Link
                             key={child.id}
-                            href={resolveUrl(child.url)}
+                            href={resolveUrl(child.url, wpHost)}
                             className="dropdown-item"
                             onClick={() => setOpen(false)}
                         >
@@ -68,7 +95,7 @@ function DropdownItem({ item, resolveUrl, replaceFlagImages }: {
     );
 }
 
-export default function NavMenu({ menuItems, replaceFlagImages, resolveUrl }: NavMenuProps) {
+export default function NavMenu({ menuItems, wpHost }: NavMenuProps) {
     const [mobileOpen, setMobileOpen] = useState(false);
 
     return (
@@ -87,12 +114,7 @@ export default function NavMenu({ menuItems, replaceFlagImages, resolveUrl }: Na
             <div className={`collapse navbar-collapse${mobileOpen ? ' show' : ''}`} id="navbarNavDropdown">
                 <ul className="navbar-nav ml-auto" id="main-menu">
                     {Array.isArray(menuItems) && menuItems.map((item) => (
-                        <DropdownItem
-                            key={item.id}
-                            item={item}
-                            resolveUrl={resolveUrl}
-                            replaceFlagImages={replaceFlagImages}
-                        />
+                        <DropdownItem key={item.id} item={item} wpHost={wpHost} />
                     ))}
                 </ul>
             </div>
