@@ -20,6 +20,12 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "flagcdn.com" },
+      { protocol: "https", hostname: "dev-bluerange.pantheonsite.io" },
+    ],
+  },
 };
 
 export default nextConfig;
