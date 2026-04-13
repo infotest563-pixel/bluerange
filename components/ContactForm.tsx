@@ -142,7 +142,7 @@ export default function ContactForm() {
                 <p className="cnt7-chtkbox">
                     <label >
                         <input 
-                            type="checkbox" style={{ width: "15%", height: "15%" }}
+                            type="checkbox" style={{ width: "15%", height: "10px" }}
                             checked={form.accepted}
                             onChange={e => set('accepted', e.target.checked)}
                         />
