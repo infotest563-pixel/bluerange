@@ -43,46 +43,6 @@ export default async function Header() {
         menuItems = await getMenu('main-menu');
     }
 
-    // Replace base64 flag images in menu titles with flagcdn.com URLs
-    const langFlagMap: Record<string, string> = {
-        svenska: 'se',
-        english: 'gb',
-        svenska: 'se',
-        norsk: 'no',
-        dansk: 'dk',
-        deutsch: 'de',
-        français: 'fr',
-        español: 'es',
-        finnish: 'fi',
-        suomi: 'fi',
-    };
-
-    const replaceFlagImages = (html: string): string => {
-        // Match any <img> that has a base64 src — extract alt from anywhere in the tag
-        return html.replace(
-            /<img[^>]*src="data:image[^"]*"[^>]*\/?>/gi,
-            (match) => {
-                const altMatch = match.match(/alt="([^"]*)"/i);
-                const alt = altMatch ? altMatch[1] : '';
-                const code = langFlagMap[alt.toLowerCase()];
-                if (code) {
-                    return `<img src="https://flagcdn.com/w20/${code}.png" srcset="https://flagcdn.com/w40/${code}.png 2x" width="16" height="11" alt="${alt}" style="width:16px;height:11px;vertical-align:middle;" />`;
-                }
-                // Fallback: show the alt text as a label
-                return alt ? `<span style="font-size:12px;">${alt}</span>` : '';
-            }
-        );
-    };
-
-    // Fallback URL resolver
-    const resolveUrl = (url: string) => {
-        if (!url) return '#';
-        if (url.startsWith(WP_HOST)) {
-            return url.replace(WP_HOST, '') || '/';
-        }
-        return url;
-    };
-
     return (
         <div suppressHydrationWarning>
             <div className="top-header">
