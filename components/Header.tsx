@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getMenu, getSite, getSettings } from '../lib/wp';
 import DeskToggle from './DeskToggle';
 import NavMenu from './NavMenu';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const WP_HOST = 'https://dev-bluerange.pantheonsite.io';
 
@@ -62,6 +63,9 @@ export default async function Header() {
                                             <img src={`${WP_HOST}/wp-content/uploads/2023/09/envelope-fill.svg`} className="img-fluid" alt="" />
                                             <span>Support@bluerange.se</span>
                                         </a>
+                                    </li>
+                                    <li style={{ display: 'flex', alignItems: 'center' }}>
+                                        <LanguageSwitcher />
                                     </li>
                                 </ul>
                             </div>
