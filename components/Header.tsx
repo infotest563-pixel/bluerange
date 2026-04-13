@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getMenu, getSite, getSettings } from '../lib/wp';
+import DeskToggle from './DeskToggle';
 
 const WP_HOST = 'https://dev-bluerange.pantheonsite.io';
 
@@ -188,15 +189,7 @@ export default async function Header() {
                             </ul>
                         </div>
 
-                        <div className="desk-toggale">
-                            <span className="desk-show"><i className="fa fa-bars" aria-hidden="true"></i></span>
-                            <div className="deskside-inner">
-                                <span className="desk-close"><i className="fa fa-window-close" aria-hidden="true"></i></span>
-                                <div className="deskside-content">
-                                    {/* Sidebar content */}
-                                </div>
-                            </div>
-                        </div>
+                        <DeskToggle />
 
                     </div>
                 </nav>
