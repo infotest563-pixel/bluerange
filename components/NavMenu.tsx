@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import LanguageSwitcher from './LanguageSwitcher';
 
 interface MenuItem {
     id: string | number;
@@ -16,62 +17,18 @@ interface NavMenuProps {
     wpHost: string;
 }
 
-const langFlagMap: Record<string, string> = {
-    svenska: 'se',
-    english: 'gb',
-    norsk: 'no',
-    dansk: 'dk',
-    deutsch: 'de',
-    français: 'fr',
-    español: 'es',
-    finnish: 'fi',
-    suomi: 'fi',
-};
-
-// Decode HTML entities like &amp; &lt; &#039; etc.
-function decodeEntities(str: string): string {
-    return str
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/&#039;/g, "'")
-        .replace(/\\u003c/gi, '<')
-        .replace(/\\u003e/gi, '>');
-}
-
-// Returns { flagUrl, label } if title contains a flag image, else null
-function parseFlagTitle(rawTitle: string): { flagUrl: string; label: string } | null {
-    const decoded = decodeEntities(rawTitle);
-    // Match base64 img tag and extract alt
-    const imgMatch = decoded.match(/<img[^>]*src="data:image[^"]*"[^>]*>/i);
-    if (!imgMatch) return null;
-    const altMatch = imgMatch[0].match(/alt="([^"]*)"/i);
-    const alt = altMatch ? altMatch[1] : '';
-    const code = langFlagMap[alt.toLowerCase()];
-    if (!code) return null;
-    return {
-        flagUrl: `https://flagcdn.com/w40/${code}.png`,
-        label: alt,
-    };
-}
-
-function MenuTitle({ title }: { title: string }) {
-    const flag = parseFlagTitle(title);
-    if (flag) {
-        return (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-                src={flag.flagUrl}
-                alt={flag.label}
-                width={22}
-                height={15}
-                style={{ width: '22px', height: '15px', verticalAlign: 'middle', display: 'inline-block' }}
-            />
-        );
-    }
-    // Plain text title — safe to render as HTML for any WP formatting
-    return <span dangerouslySetInnerHTML={{ __html: title }} />;
+// Detect if a menu item is the Polylang language switcher
+function isLangSwitcher(item: MenuItem): boolean {
+    return (
+        item.url === '#pll_switcher' ||
+        (Array.isArray(item.classes) && item.classes.includes('pll-parent-menu-item')) ||
+        (item.children?.some(c =>
+            Array.isArray(c.classes) && (
+                c.classes.includes('lang-item') ||
+                c.classes.includes('current-lang')
+            )
+        ) ?? false)
+    );
 }
 
 function resolveUrl(url: string, wpHost: string): string {
@@ -95,6 +52,15 @@ function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
         return () => document.removeEventListener('mousedown', handler);
     }, []);
 
+    // Replace Polylang switcher with our own component
+    if (isLangSwitcher(item)) {
+        return (
+            <li className="nav-item">
+                <LanguageSwitcher />
+            </li>
+        );
+    }
+
     const liClasses = ['nav-item', ...(item.classes || [])];
     if (hasChildren) liClasses.push('dropdown', 'menu-item-has-children');
 
@@ -106,7 +72,7 @@ function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
                 onClick={hasChildren ? (e: React.MouseEvent) => { e.preventDefault(); setOpen((o: boolean) => !o); } : undefined}
                 aria-expanded={hasChildren ? open : undefined}
             >
-                <MenuTitle title={item.title} />
+                <span dangerouslySetInnerHTML={{ __html: item.title }} />
             </Link>
             {hasChildren && (
                 <div className={`dropdown-menu${open ? ' show' : ''}`}>
@@ -117,7 +83,7 @@ function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
                             className="dropdown-item"
                             onClick={() => setOpen(false)}
                         >
-                            <MenuTitle title={child.title} />
+                            <span dangerouslySetInnerHTML={{ __html: child.title }} />
                         </Link>
                     ))}
                 </div>
