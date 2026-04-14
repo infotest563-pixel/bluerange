@@ -20,14 +20,26 @@ interface NavMenuProps {
 function isLangSwitcher(item: MenuItem): boolean {
     return (
         item.url === '#pll_switcher' ||
-        (Array.isArray(item.classes) && item.classes.includes('pll-parent-menu-item')) ||
+        item.url === '#' && item.title.includes('data:image') ||
+        (Array.isArray(item.classes) && (
+            item.classes.includes('pll-parent-menu-item') ||
+            item.classes.includes('lang-item')
+        )) ||
+        item.title.includes('data:image') ||
         (item.children?.some(c =>
             Array.isArray(c.classes) && (
                 c.classes.includes('lang-item') ||
-                c.classes.includes('current-lang')
+                c.classes.includes('current-lang') ||
+                c.classes.includes('lang-item-sv') ||
+                c.classes.includes('lang-item-en')
             )
         ) ?? false)
     );
+}
+
+// Strip any base64 images from title HTML — safety net
+function cleanTitle(html: string): string {
+    return html.replace(/<img[^>]*src="data:image[^"]*"[^>]*\/?>/gi, '').trim();
 }
 
 function resolveUrl(url: string, wpHost: string): string {
@@ -67,7 +79,7 @@ function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
                 onClick={hasChildren ? (e: React.MouseEvent) => { e.preventDefault(); setOpen((o: boolean) => !o); } : undefined}
                 aria-expanded={hasChildren ? open : undefined}
             >
-                <span dangerouslySetInnerHTML={{ __html: item.title }} />
+                <span dangerouslySetInnerHTML={{ __html: cleanTitle(item.title) }} />
             </Link>
             {hasChildren && (
                 <div className={`dropdown-menu${open ? ' show' : ''}`}>
@@ -78,7 +90,7 @@ function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
                             className="dropdown-item"
                             onClick={() => setOpen(false)}
                         >
-                            <span dangerouslySetInnerHTML={{ __html: child.title }} />
+                            <span dangerouslySetInnerHTML={{ __html: cleanTitle(child.title) }} />
                         </Link>
                     ))}
                 </div>
