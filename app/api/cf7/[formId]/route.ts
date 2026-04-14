@@ -86,20 +86,19 @@ export async function POST(
         body.append('_wpcf7_container_post', '0');
         body.append('_wpcf7_posted_data_hash', '');
 
+        // Add all form fields from the incoming request
         for (const [key, value] of incoming.entries()) {
-            if (!key.startsWith('_wpcf7')) {
-                body.append(key, value);
-            }
+            body.append(key, value);
         }
 
-        const res = await fetch(
-            `${WP}/wp-json/contact-form-7/v1/contact-forms/${guid}/feedback`,
-            { method: 'POST', body }
-        );
+        const wpUrl = `${WP}/wp-json/contact-form-7/v1/contact-forms/${guid}/feedback`;
 
+        const res = await fetch(wpUrl, { method: 'POST', body });
         const json = await res.json();
+        
         return NextResponse.json(json);
-    } catch {
+    } catch (error) {
+        console.error('Submission error:', error);
         return NextResponse.json({ status: 'error', message: 'Submission failed' }, { status: 500 });
     }
 }
