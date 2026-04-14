@@ -149,19 +149,24 @@ export default function WordPressPageRenderer({ page }: { page: any }) {
         case 'public-sector':
         case 'offentlig-sektor': // Swedish
             return <PublicSector page={page} />;
-        case 'about-bluerange': // User specified slug
-            return <About page={page} />;
-        case 'about': // Alias
+        case 'about-bluerange':
+        case 'about':
+        case 'om-bluerange': // Swedish
             return <About page={page} />;
         case 'career':
+        case 'karriar': // Swedish
             return <Career page={page} />;
         case 'kubernetes-as-a-service':
+        case 'kubernetes-som-en-tjanst': // Swedish
             return <KubernetesAsAService page={page} />;
         case 'swedish-cloud':
+        case 'svenskt-moln': // Swedish
             return <SwedishCloud page={page} />;
         case 'contact-us':
+        case 'kontakta-oss': // Swedish
             return <ContactUs page={page} />;
         case 'news':
+        case 'nyheter': // Swedish
             return <News page={page} />;
         case 'products':
             return <Products page={page} />;
