@@ -126,6 +126,16 @@ export default async function Backup({ page }: { page: any }) {
                                     formId={947}
                                     unitTag="wpcf7-f947-o1"
                                     submitLabel="Submit Request"
+                                    fields={[
+                                        { name: 'text-201', type: 'text', placeholder: 'First Name', required: true, half: true },
+                                        { name: 'text-202', type: 'text', placeholder: 'Last Name', required: true, half: true },
+                                        { name: 'text-203', type: 'email', placeholder: 'Email Address', required: true, half: true },
+                                        { name: 'number-204', type: 'tel', placeholder: 'Phone Number', required: true, half: true },
+                                        { name: 'text-205', type: 'text', placeholder: 'Company Name', required: true },
+                                        { name: 'dropdown-206', type: 'select', placeholder: 'Storage Unit', required: true, options: ['GB', 'TB'] },
+                                        { name: 'number-207', type: 'text', placeholder: 'Storage Amount', required: true },
+                                        { name: 'textarea-208', type: 'textarea', placeholder: 'Message', required: false },
+                                    ]}
                                 />
                             </div>
                         </div>
