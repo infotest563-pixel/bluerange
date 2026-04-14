@@ -14,7 +14,7 @@ const FLAG_OVERRIDE: Record<string, string> = { en: 'gb' };
 
 const FALLBACK: WPLang[] = [
     { name: 'English', slug: 'en', flag_code: 'gb', home_url: '/', is_default: true },
-    { name: 'Svenska', slug: 'sv', flag_code: 'se', home_url: '/', is_default: false },
+    { name: '', slug: 'sv', flag_code: 'se', home_url: '/', is_default: false },
 ];
 
 function getCookie(name: string): string {
