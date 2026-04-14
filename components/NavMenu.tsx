@@ -7,8 +7,8 @@ interface MenuItem {
     id: string | number;
     title: string;
     url: string;
-    classes?: string[];
-    children?: MenuItem[];
+    classes?: string[] | string;
+    children?: MenuItem[] | string;
 }
 
 interface NavMenuProps {
@@ -16,20 +16,33 @@ interface NavMenuProps {
     wpHost: string;
 }
 
-// Filter out Polylang language switcher items — we render our own
+// Normalize classes — API returns array for top-level, string for children
+function getClasses(item: MenuItem): string[] {
+    if (!item.classes) return [];
+    if (Array.isArray(item.classes)) return item.classes;
+    return item.classes.split(' ').filter(Boolean);
+}
+
+// Normalize children — API returns array or empty string ""
+function getChildren(item: MenuItem): MenuItem[] {
+    if (!item.children || item.children === '') return [];
+    if (Array.isArray(item.children)) return item.children;
+    return [];
+}
+
+// Detect Polylang language switcher items
 function isLangItem(item: MenuItem): boolean {
-    const classes = item.classes || [];
+    const classes = getClasses(item);
+    const classStr = classes.join(' ');
     return (
         item.url === '#pll_switcher' ||
         item.title.includes('data:image') ||
-        classes.some(c => ['pll-parent-menu-item', 'lang-item', 'lang-item-sv', 'lang-item-en'].includes(c)) ||
-        (item.children ?? []).some(child =>
-            (child.classes ?? []).some(c => ['lang-item', 'lang-item-sv', 'lang-item-en', 'current-lang'].includes(c))
-        )
+        classStr.includes('pll-parent-menu-item') ||
+        classStr.includes('lang-item')
     );
 }
 
-// Remove base64 images from any title string
+// Strip base64 images from title
 function cleanTitle(html: string): string {
     return html.replace(/<img[^>]*src="data:image[^"]*"[^>]*\/?>/gi, '').trim();
 }
@@ -43,9 +56,9 @@ function resolveUrl(url: string, wpHost: string): string {
 function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLLIElement>(null);
-    const hasChildren = !!(item.children && item.children.length > 0);
+    const children = getChildren(item);
+    const hasChildren = children.length > 0;
 
-    // Close on outside click
     useEffect(() => {
         const handler = (e: MouseEvent) => {
             if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
@@ -56,7 +69,7 @@ function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
 
     if (isLangItem(item)) return null;
 
-    const liClasses = ['nav-item', ...(item.classes || [])];
+    const liClasses = ['nav-item', ...getClasses(item)];
     if (hasChildren) liClasses.push('dropdown', 'menu-item-has-children');
 
     return (
@@ -74,7 +87,7 @@ function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
             </Link>
             {hasChildren && open && (
                 <div className="dropdown-menu show">
-                    {item.children!.filter(c => !isLangItem(c)).map((child) => (
+                    {children.filter(c => !isLangItem(c)).map((child) => (
                         <Link
                             key={child.id}
                             href={resolveUrl(child.url, wpHost)}
