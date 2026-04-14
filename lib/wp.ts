@@ -153,3 +153,13 @@ export async function getPostBySlugWithLang(slug: string, lang: string) {
     const data = await res.json();
     return data[0] || null;
 }
+
+// Strip CF7 shortcode forms from rendered HTML content
+// Prevents native form submission redirecting to WP endpoint
+export function stripCF7Forms(html: string): string {
+    if (!html) return html;
+    // Remove entire wpcf7 div blocks
+    return html
+        .replace(/<div[^>]*class="[^"]*wpcf7[^"]*"[^>]*>[\s\S]*?<\/div>\s*<\/div>/gi, '')
+        .replace(/\[contact-form-7[^\]]*\]/gi, '');
+}

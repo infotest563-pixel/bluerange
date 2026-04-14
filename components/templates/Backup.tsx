@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getMedia } from '../../lib/wp';
+import { getMedia, stripCF7Forms } from '../../lib/wp';
 import CF7Form from '../CF7Form';
 
 export default async function Backup({ page }: { page: any }) {
