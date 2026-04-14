@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { getMedia, renderShortcode } from '../../lib/wp';
+import { getMedia } from '../../lib/wp';
+import CF7Form from '../CF7Form';
 
 export default async function ContactUs({ page }: { page: any }) {
     const acf = page.acf;
@@ -18,10 +19,7 @@ export default async function ContactUs({ page }: { page: any }) {
 
     const bannerBg = await resolveImage(acf.banner_backgroung_image);
 
-    // Contact Form Shortcode
-    const contactFormHtml = acf.contact_form
-        ? await renderShortcode(acf.contact_form)
-        : '';
+    // Contact Form — using CF7Form directly (form ID 70)
 
     // Phone logic
     const contactNo = acf.phone_number;
@@ -73,11 +71,22 @@ export default async function ContactUs({ page }: { page: any }) {
                             </div>
                         </div>
                         <div className="bl-box col-sm-12 col-lg-6 cu-formbx">
-                            {contactFormHtml && (
-                                <div className="wd-100">
-                                    <div dangerouslySetInnerHTML={{ __html: contactFormHtml }} suppressHydrationWarning />
-                                </div>
-                            )}
+                            <div className="wd-100">
+                                <CF7Form
+                                    formId={70}
+                                    unitTag="wpcf7-f70-o1"
+                                    fields={[
+                                        { name: 'text-101', type: 'text', placeholder: 'First Name', required: true, half: true },
+                                        { name: 'text-102', type: 'text', placeholder: 'Last Name', required: true, half: true },
+                                        { name: 'text-103', type: 'email', placeholder: 'Email Address', required: true, half: true },
+                                        { name: 'number-104', type: 'tel', placeholder: 'Phone Number', required: true, half: true },
+                                        { name: 'text-105', type: 'text', placeholder: 'Your Subject', required: true },
+                                        { name: 'text-106', type: 'text', placeholder: 'Company Name', required: true },
+                                        { name: 'textarea-109', type: 'textarea', placeholder: 'Your Message', required: false },
+                                    ]}
+                                    submitLabel="Send"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

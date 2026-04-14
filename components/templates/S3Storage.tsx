@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { getMedia, renderShortcode } from '../../lib/wp';
+import { getMedia } from '../../lib/wp';
+import CF7Form from '../CF7Form';
 
 export default async function S3Storage({ page }: { page: any }) {
     const acf = page.acf;
@@ -24,10 +25,7 @@ export default async function S3Storage({ page }: { page: any }) {
         imgUrl: await resolveImage(row.s3_storage_image)
     })));
 
-    // Shortcode
-    const shortcodeHtml = acf.colc_form_shortcode
-        ? await renderShortcode(acf.colc_form_shortcode)
-        : '';
+    // Shortcode removed — using CF7Form directly
 
     return (
         <div className="s3-storage-template">
@@ -107,7 +105,19 @@ export default async function S3Storage({ page }: { page: any }) {
                                     <h2>{acf.colc_heading}</h2>
                                 </div>
                                 <div className="wd-100">
-                                    <div dangerouslySetInnerHTML={{ __html: shortcodeHtml }} />
+                                    <CF7Form
+                                        formId={955}
+                                        unitTag="wpcf7-f955-o1"
+                                        fields={[
+                                            { name: 'first-name', type: 'text', placeholder: 'First Name', required: true, half: true },
+                                            { name: 'last-name', type: 'text', placeholder: 'Last Name', required: true, half: true },
+                                            { name: 'email', type: 'email', placeholder: 'Email', required: true, half: true },
+                                            { name: 'phone', type: 'tel', placeholder: 'Phone Number', required: false, half: true },
+                                            { name: 'company', type: 'text', placeholder: 'Company Name', required: false },
+                                            { name: 'your-message', type: 'textarea', placeholder: 'Message', required: false },
+                                        ]}
+                                        submitLabel="Submit Request"
+                                    />
                                 </div>
                             </div>
                         </div>

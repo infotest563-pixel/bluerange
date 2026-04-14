@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { getMedia, renderShortcode } from '../../lib/wp';
+import { getMedia } from '../../lib/wp';
+import CF7Form from '../CF7Form';
 
 export default async function SoftwareHostingAsAService({ page }: { page: any }) {
     const acf = page.acf;
@@ -30,10 +31,7 @@ export default async function SoftwareHostingAsAService({ page }: { page: any })
         imgUrl: await resolveImage(row.software_images)
     })));
 
-    // Shortcode
-    const shortcodeHtml = acf.get_a_quote_form
-        ? await renderShortcode(acf.get_a_quote_form)
-        : '';
+    // Shortcode removed — using CF7Form directly
 
     return (
         <div className="software-hosting-template">
@@ -110,7 +108,18 @@ export default async function SoftwareHostingAsAService({ page }: { page: any })
                         <div className="bl-box col-sm-12 col-lg-6 hm-col-frm sh-col-form">
                             <div className="wd-100">
                                 {acf.get_a_quote_title && <h2>{acf.get_a_quote_title}</h2>}
-                                <div dangerouslySetInnerHTML={{ __html: shortcodeHtml }} suppressHydrationWarning />
+                                <CF7Form
+                                    formId={944}
+                                    unitTag="wpcf7-f944-o1"
+                                    fields={[
+                                        { name: 'full-name', type: 'text', placeholder: 'Full Name', required: true },
+                                        { name: 'email', type: 'email', placeholder: 'Email', required: true, half: true },
+                                        { name: 'phone', type: 'tel', placeholder: 'Phone Number', required: false, half: true },
+                                        { name: 'company', type: 'text', placeholder: 'Company Name', required: false },
+                                        { name: 'your-message', type: 'textarea', placeholder: 'Message', required: false },
+                                    ]}
+                                    submitLabel="Get a Quote"
+                                />
                             </div>
                         </div>
                     </div>

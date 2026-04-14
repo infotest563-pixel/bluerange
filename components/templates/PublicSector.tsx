@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { getMedia, renderShortcode } from '../../lib/wp';
+import { getMedia } from '../../lib/wp';
+import CF7Form from '../CF7Form';
 
 export default async function PublicSector({ page }: { page: any }) {
     const acf = page.acf;
@@ -38,10 +39,7 @@ export default async function PublicSector({ page }: { page: any }) {
         imgUrl: await resolveImage(row.icon_images)
     })));
 
-    // Shortcode
-    const shortcodeHtml = acf.metting_form_shortcode
-        ? await renderShortcode(acf.metting_form_shortcode)
-        : '';
+    // Shortcode removed — using CF7Form directly
 
     return (
         <div className="public-sector-template">
@@ -149,9 +147,19 @@ export default async function PublicSector({ page }: { page: any }) {
                         </div>
                         <div className="bl-box col-sm-12 col-md-12 col-lg-7">
                             <div className="wd-100">
-                                {shortcodeHtml && (
-                                    <div dangerouslySetInnerHTML={{ __html: shortcodeHtml }} suppressHydrationWarning />
-                                )}
+                                <CF7Form
+                                    formId={943}
+                                    unitTag="wpcf7-f943-o1"
+                                    fields={[
+                                        { name: 'first-name', type: 'text', placeholder: 'First Name', required: true, half: true },
+                                        { name: 'last-name', type: 'text', placeholder: 'Last Name', required: true, half: true },
+                                        { name: 'email', type: 'email', placeholder: 'Email Address', required: true, half: true },
+                                        { name: 'phone', type: 'tel', placeholder: 'Phone Number', required: false, half: true },
+                                        { name: 'company', type: 'text', placeholder: 'Company Name', required: false },
+                                        { name: 'your-message', type: 'textarea', placeholder: 'Message', required: false },
+                                    ]}
+                                    submitLabel="Book a Meeting"
+                                />
                             </div>
                         </div>
                     </div>

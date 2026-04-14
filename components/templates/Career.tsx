@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { getMedia, renderShortcode } from '../../lib/wp';
+import { getMedia } from '../../lib/wp';
+import CF7Form from '../CF7Form';
 
 export default async function Career({ page }: { page: any }) {
     const acf = page.acf;
@@ -28,10 +29,7 @@ export default async function Career({ page }: { page: any }) {
         imgUrl: await resolveImage(row)
     })));
 
-    // Shortcode
-    const shortcodeHtml = acf.career_form_shortcode
-        ? await renderShortcode(acf.career_form_shortcode)
-        : '';
+    // Shortcode removed — using CF7Form directly
 
     // Check if embody_listing exists
     const embodyListing = acf.embody_listing || [];
@@ -155,9 +153,19 @@ export default async function Career({ page }: { page: any }) {
                         </div>
                         <div className="bl-box col-sm-12 col-md-12 col-lg-12">
                             <div className="wd-100">
-                                {shortcodeHtml && (
-                                    <div dangerouslySetInnerHTML={{ __html: shortcodeHtml }} suppressHydrationWarning />
-                                )}
+                                <CF7Form
+                                    formId={957}
+                                    unitTag="wpcf7-f957-o1"
+                                    fields={[
+                                        { name: 'first-name', type: 'text', placeholder: 'First Name', required: true, half: true },
+                                        { name: 'last-name', type: 'text', placeholder: 'Last Name', required: true, half: true },
+                                        { name: 'email', type: 'email', placeholder: 'Email Address', required: true, half: true },
+                                        { name: 'phone', type: 'tel', placeholder: 'Phone Number', required: false, half: true },
+                                        { name: 'position', type: 'text', placeholder: 'Position Applied For', required: false },
+                                        { name: 'your-message', type: 'textarea', placeholder: 'Cover Letter / Message', required: false },
+                                    ]}
+                                    submitLabel="Apply Now"
+                                />
                             </div>
                         </div>
                     </div>

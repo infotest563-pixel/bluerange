@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { getMedia, renderShortcode } from '../../lib/wp';
+import { getMedia } from '../../lib/wp';
+import CF7Form from '../CF7Form';
 
 export default async function Services({ page }: { page: any }) {
     const acf = page.acf;
@@ -26,10 +27,7 @@ export default async function Services({ page }: { page: any }) {
         imgUrl: await resolveImage(row.services_image)
     })));
 
-    // Service Questions Shortcode
-    const serviceQSShortcodeHtml = acf.services_questions_shortcode
-        ? await renderShortcode(acf.services_questions_shortcode)
-        : '';
+    // Service Questions — using CF7Form directly
 
     // Testimonial logic needs fetching 'testimonials' custom post type.
     // For now, we will add a placeholder or skip if we can't fetch CPTs easily without a dedicated fetching function.
@@ -122,11 +120,20 @@ export default async function Services({ page }: { page: any }) {
                             </div>
                         </div>
                         <div className="bl-box col-sm-12 col-md-12 col-lg-7 sr-srqstacrod">
-                            {serviceQSShortcodeHtml && (
-                                <div className="wd-100">
-                                    <div dangerouslySetInnerHTML={{ __html: serviceQSShortcodeHtml }} suppressHydrationWarning />
-                                </div>
-                            )}
+                            <div className="wd-100">
+                                <CF7Form
+                                    formId={282}
+                                    unitTag="wpcf7-f282-o1"
+                                    fields={[
+                                        { name: 'first-name', type: 'text', placeholder: 'First Name', required: true, half: true },
+                                        { name: 'last-name', type: 'text', placeholder: 'Last Name', required: true, half: true },
+                                        { name: 'email', type: 'email', placeholder: 'Email Address', required: true, half: true },
+                                        { name: 'phone', type: 'tel', placeholder: 'Phone Number', required: false, half: true },
+                                        { name: 'your-message', type: 'textarea', placeholder: 'Your Question', required: false },
+                                    ]}
+                                    submitLabel="Send"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

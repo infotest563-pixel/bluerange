@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { getMedia, renderShortcode } from '../../lib/wp';
+import { getMedia } from '../../lib/wp';
+import CF7Form from '../CF7Form';
 
 export default async function Backup({ page }: { page: any }) {
     const acf = page.acf;
@@ -30,10 +31,7 @@ export default async function Backup({ page }: { page: any }) {
         imgUrl: await resolveImage(row.box_image)
     })));
 
-    // Shortcode
-    const shortcodeHtml = acf.storage_request_form_shortcode
-        ? await renderShortcode(acf.storage_request_form_shortcode)
-        : '';
+    // Shortcode removed — using CF7Form directly
 
     return (
         <div className="backup-template">
@@ -124,7 +122,19 @@ export default async function Backup({ page }: { page: any }) {
                                 {acf.storage_request_heading && <h2>{acf.storage_request_heading}</h2>}
                             </div>
                             <div className="wd-100">
-                                <div dangerouslySetInnerHTML={{ __html: shortcodeHtml }} suppressHydrationWarning />
+                                <CF7Form
+                                    formId={947}
+                                    unitTag="wpcf7-f947-o1"
+                                    fields={[
+                                        { name: 'first-name', type: 'text', placeholder: 'First Name', required: true, half: true },
+                                        { name: 'last-name', type: 'text', placeholder: 'Last Name', required: true, half: true },
+                                        { name: 'email', type: 'email', placeholder: 'Email', required: true, half: true },
+                                        { name: 'phone', type: 'tel', placeholder: 'Phone Number', required: false, half: true },
+                                        { name: 'company', type: 'text', placeholder: 'Company Name', required: false },
+                                        { name: 'your-message', type: 'textarea', placeholder: 'Message', required: false },
+                                    ]}
+                                    submitLabel="Submit Request"
+                                />
                             </div>
                         </div>
                     </div>
