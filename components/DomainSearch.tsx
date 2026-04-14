@@ -13,15 +13,10 @@ export default function DomainSearch({ buttonText = 'Search Domain' }: { buttonT
         setLoading(true);
 
         try {
-            const body = new URLSearchParams({
-                action: 'wdc_check_domain',
-                domain: raw,
-                item_id: '741',
-            });
-            const res = await fetch('https://dev-bluerange.pantheonsite.io/wp-admin/admin-ajax.php', {
+            const res = await fetch('/api/domain-check', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: body.toString(),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ domain: raw }),
             });
             const json = await res.json();
 
