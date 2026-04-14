@@ -181,8 +181,12 @@ export async function getPostBySlugWithLang(slug: string, lang: string) {
 // Prevents native form submission redirecting to WP endpoint
 export function stripCF7Forms(html: string): string {
     if (!html) return html;
-    // Remove entire wpcf7 div blocks
-    return html
-        .replace(/<div[^>]*class="[^"]*wpcf7[^"]*"[^>]*>[\s\S]*?<\/div>\s*<\/div>/gi, '')
-        .replace(/\[contact-form-7[^\]]*\]/gi, '');
+    let result = html;
+    // Remove [contact-form-7 ...] shortcode tags
+    result = result.replace(/\[contact-form-7[^\]]*\]/gi, '');
+    // Remove entire <form> elements that post to WP CF7/shortcode endpoints
+    result = result.replace(/<form[^>]*action="[^"]*(?:wpcf7|shortcode|contact-form)[^"]*"[^>]*>[\s\S]*?<\/form>/gi, '');
+    // Remove wpcf7 wrapper divs (greedy removal of nested structure)
+    result = result.replace(/<div[^>]*(?:class|id)="[^"]*wpcf7[^"]*"[^>]*>[\s\S]*?<\/div>(?:\s*<\/div>)*/gi, '');
+    return result;
 }
