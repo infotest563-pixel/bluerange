@@ -1,6 +1,8 @@
 import { getSettings, getPageById } from '../lib/wp';
 import DesignedHomepage from '../components/DesignedHomepage';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   const settings = await getSettings();
 
