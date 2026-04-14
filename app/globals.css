@@ -63,9 +63,9 @@ li {
 
 .deskside-inner i {
     color: #fff;
-    padding: 15px 15px;
+padding: 15px 15px Important;
     background: var(--br-blue);
-    line-height: 20px;
+    line-height: 20px Important;
     margin: 10px 0 0 10px;
     border-radius: 10px;
 }
