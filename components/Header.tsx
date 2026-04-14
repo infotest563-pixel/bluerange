@@ -62,7 +62,7 @@ export default async function Header() {
                 <nav id="main-nav" className="navbar navbar-expand-md navbar-dark bg-primary" aria-labelledby="main-nav-label">
                     <h2 id="main-nav-label" className="screen-reader-text sr-only">Main Navigation</h2>
                     <div className="container">
-                        <Link href="/" className="navbar-brand custom-logo-link" rel="home">
+                        <Link href={lang === 'en' ? '/' : `/${lang}`} className="navbar-brand custom-logo-link" rel="home">
                             {logoUrl ? (
                                 <img
                                     src={logoUrl}
