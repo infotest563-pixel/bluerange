@@ -30,6 +30,9 @@ export default function CF7Form({ formId, unitTag, submitLabel = 'Submit Request
             .then(r => r.json())
             .then(data => {
                 const names: string[] = data.fields || [];
+                if (names.length === 0) {
+                    console.warn(`[CF7Form] No fields found for form ${formId}`);
+                }
                 setFields(names);
                 setValues(Object.fromEntries(names.map((n: string) => [n, ''])));
                 setReady(true);
