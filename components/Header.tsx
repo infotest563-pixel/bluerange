@@ -80,7 +80,7 @@ export default async function Header() {
 
                         <NavMenu menuItems={menuItems} wpHost={WP_HOST} />
 
-                        {/* <DeskToggle menuItems={menuItems} wpHost={WP_HOST} /> */}
+                        <DeskToggle menuItems={menuItems} wpHost={WP_HOST} />
                     </div>
                 </nav>
             </header>
