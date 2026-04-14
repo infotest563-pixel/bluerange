@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import LanguageSwitcher from './LanguageSwitcher';
 
 interface MenuItem {
     id: string | number;
@@ -29,7 +28,6 @@ function isLangSwitcher(item: MenuItem): boolean {
             )
         ) ?? false)
     );
-}   );
 }
 
 function resolveUrl(url: string, wpHost: string): string {
@@ -51,19 +49,11 @@ function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
         };
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
-    // Replace Polylang switcher with our clean component
+    }, []);
+
+    // Replace Polylang switcher with our own component
     if (isLangSwitcher(item)) {
-        return (
-            <li className="nav-item" style={{ display: 'flex', alignItems: 'center' }}>
-                <LanguageSwitcher inNav />
-            </li>
-        );
-    }f (isLangSwitcher(item)) {
-        return (
-            <li className="nav-item">
-                <LanguageSwitcher />
-            </li>
-        );
+        return null;
     }
 
     const liClasses = ['nav-item', ...(item.classes || [])];
@@ -123,4 +113,3 @@ export default function NavMenu({ menuItems, wpHost }: NavMenuProps) {
         </>
     );
 }
-    

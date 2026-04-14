@@ -10,12 +10,10 @@ interface WPLang {
     is_default: boolean;
 }
 
-interface Props {
-    inNav?: boolean; // true = inside navbar (dark text), false = top bar (white text)
-}
-
+// WP returns 'us' for English — override to 'gb'
 const flagOverride: Record<string, string> = { en: 'gb' };
 
+// Static fallback in case API is slow/unavailable
 const FALLBACK: WPLang[] = [
     { name: 'English', slug: 'en', flag_code: 'gb', home_url: '/', is_default: true },
     { name: 'Svenska', slug: 'sv', flag_code: 'se', home_url: '/', is_default: false },
@@ -31,7 +29,7 @@ function setCookie(name: string, value: string) {
     document.cookie = `${name}=${value}; path=/; max-age=31536000; SameSite=Lax`;
 }
 
-export default function LanguageSwitcher({ inNav = false }: Props) {
+export default function LanguageSwitcher() {
     const [langs, setLangs] = useState<WPLang[]>(FALLBACK);
     const [current, setCurrent] = useState('en');
 
@@ -51,11 +49,8 @@ export default function LanguageSwitcher({ inNav = false }: Props) {
         window.location.reload();
     };
 
-    const textColor = inNav ? 'var(--text, #333)' : '#fff';
-    const activeBorder = inNav ? '2px solid var(--blue, #0070f3)' : '2px solid #fff';
-
     return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             {langs.map((lang) => {
                 const flagCode = flagOverride[lang.slug] || lang.flag_code;
                 const isActive = current === lang.slug;
@@ -71,9 +66,9 @@ export default function LanguageSwitcher({ inNav = false }: Props) {
                             border: 'none',
                             background: 'transparent',
                             cursor: 'pointer',
-                            padding: '2px 5px',
-                            opacity: isActive ? 1 : 0.5,
-                            borderBottom: isActive ? activeBorder : '2px solid transparent',
+                            padding: '2px 4px',
+                            opacity: isActive ? 1 : 0.55,
+                            borderBottom: isActive ? '2px solid #fff' : '2px solid transparent',
                             borderRadius: 0,
                             lineHeight: 1,
                             transition: 'opacity 0.2s',
@@ -88,7 +83,7 @@ export default function LanguageSwitcher({ inNav = false }: Props) {
                             alt={lang.name}
                             style={{ display: 'block' }}
                         />
-                        <span style={{ color: textColor, fontSize: '13px', fontWeight: isActive ? 600 : 400 }}>
+                        <span style={{ color: '#fff', fontSize: '13px', fontWeight: isActive ? 600 : 400 }}>
                             {lang.name}
                         </span>
                     </button>
