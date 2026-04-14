@@ -81,6 +81,12 @@ echo ============================================================
 echo    SUCCESS! CODE DEPLOYED TO GITHUB
 echo ============================================================
 echo.
+echo FILES DEPLOYED:
+echo   - components/NavMenu.tsx (trailing slash fix)
+echo   - components/pages/WordPressPageRenderer.tsx (Swedish slugs)
+echo   - app/en/home/page.tsx (English home route)
+echo   - app/sv/home/page.tsx (Swedish home route)
+echo.
 echo NEXT STEPS:
 echo.
 echo 1. Go to Vercel Dashboard:
