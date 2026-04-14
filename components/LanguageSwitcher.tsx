@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface WPLang {
     name: string;
@@ -30,6 +30,8 @@ function setCookie(name: string, value: string) {
 export default function LanguageSwitcher() {
     const [langs, setLangs] = useState<WPLang[]>(FALLBACK);
     const [current, setCurrent] = useState('en');
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const saved = getCookie('lang');
@@ -43,51 +45,110 @@ export default function LanguageSwitcher() {
             .catch(() => {});
     }, []);
 
+    // Close on outside click
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
     const switchLang = (lang: WPLang) => {
         setCookie('lang', lang.slug);
         setCurrent(lang.slug);
+        setOpen(false);
         window.location.reload();
     };
 
+    const activeLang = langs.find(l => l.slug === current) || langs[0];
+    const otherLangs = langs.filter(l => l.slug !== current);
+
+    if (!activeLang) return null;
+
+    const activeFlag = FLAG_OVERRIDE[activeLang.slug] || activeLang.flag_code;
+
     return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {langs.map((lang: WPLang) => {
-                const flagCode = FLAG_OVERRIDE[lang.slug] || lang.flag_code;
-                const isActive = current === lang.slug;
-                return (
-                    <button
-                        key={lang.slug}
-                        onClick={() => switchLang(lang)}
-                        title={lang.name}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '5px',
-                            background: 'transparent',
-                            border: 'none',
-                            cursor: 'pointer',
-                            padding: '2px 0',
-                            opacity: isActive ? 1 : 0.5,
-                            borderBottom: isActive ? '2px solid #fff' : '2px solid transparent',
-                            transition: 'opacity 0.2s',
-                            lineHeight: 1,
-                        }}
-                    >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                            src={`https://flagcdn.com/w20/${flagCode}.png`}
-                            srcSet={`https://flagcdn.com/w40/${flagCode}.png 2x`}
-                            width={20}
-                            height={14}
-                            alt={lang.name}
-                            style={{ display: 'block', flexShrink: 0 }}
-                        />
-                        <span style={{ color: '#fff', fontSize: '13px', fontWeight: isActive ? 600 : 400, whiteSpace: 'nowrap' }}>
-                            {lang.name}
-                        </span>
-                    </button>
-                );
-            })}
+        <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
+            {/* Trigger — shows current language flag + dropdown arrow */}
+            <button
+                onClick={() => setOpen(o => !o)}
+                title={activeLang.name}
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '2px 4px',
+                    lineHeight: 1,
+                }}
+            >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    src={`https://flagcdn.com/w20/${activeFlag}.png`}
+                    srcSet={`https://flagcdn.com/w40/${activeFlag}.png 2x`}
+                    width={20}
+                    height={14}
+                    alt={activeLang.name}
+                    style={{ display: 'block' }}
+                />
+                <span style={{ color: '#fff', fontSize: '11px' }}>▼</span>
+            </button>
+
+            {/* Dropdown */}
+            {open && (
+                <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    background: '#fff',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    minWidth: '130px',
+                    zIndex: 999,
+                    overflow: 'hidden',
+                }}>
+                    {otherLangs.map((lang: WPLang) => {
+                        const flagCode = FLAG_OVERRIDE[lang.slug] || lang.flag_code;
+                        return (
+                            <button
+                                key={lang.slug}
+                                onClick={() => switchLang(lang)}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    width: '100%',
+                                    padding: '8px 12px',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                    fontSize: '14px',
+                                    color: '#333',
+                                    borderBottom: '1px solid #f0f0f0',
+                                }}
+                                onMouseEnter={e => (e.currentTarget.style.background = '#f5f5f5')}
+                                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                            >
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                    src={`https://flagcdn.com/w20/${flagCode}.png`}
+                                    srcSet={`https://flagcdn.com/w40/${flagCode}.png 2x`}
+                                    width={20}
+                                    height={14}
+                                    alt={lang.name}
+                                    style={{ display: 'block', flexShrink: 0 }}
+                                />
+                                <span>{lang.name}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
         </div>
     );
 }
