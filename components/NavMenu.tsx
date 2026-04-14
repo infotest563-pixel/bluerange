@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 interface MenuItem {
     id: string | number;
@@ -47,12 +48,23 @@ function cleanTitle(html: string): string {
     return html.replace(/<img[^>]*src="data:image[^"]*"[^>]*\/?>/gi, '').trim();
 }
 
-function resolveUrl(url: string, wpHost: string): string {
+function resolveUrl(url: string, wpHost: string, currentLang: string): string {
     if (!url || url === '#' || url === '#pll_switcher') return '#';
     let resolved = url;
     if (url.startsWith(wpHost)) {
         resolved = url.replace(wpHost, '') || '/';
     }
+    
+    // Ensure the language segment is preserved if it exists in the current URL
+    const validLangs = ['en', 'sv'];
+    if (validLangs.includes(currentLang)) {
+        // If resolved URL doesn't already start with a lang segment, prepend it
+        const segments = resolved.split('/').filter(Boolean);
+        if (segments.length === 0 || !validLangs.includes(segments[0])) {
+            resolved = `/${currentLang}${resolved === '/' ? '' : resolved}`;
+        }
+    }
+
     // Strip trailing slash (except for root path)
     if (resolved !== '/' && resolved.endsWith('/')) {
         resolved = resolved.slice(0, -1);
@@ -60,7 +72,7 @@ function resolveUrl(url: string, wpHost: string): string {
     return resolved;
 }
 
-function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
+function DropdownItem({ item, wpHost, currentLang }: { item: MenuItem; wpHost: string; currentLang: string }) {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLLIElement>(null);
     const children = getChildren(item);
@@ -82,7 +94,7 @@ function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
     return (
         <li ref={ref} className={liClasses.join(' ')}>
             <Link
-                href={resolveUrl(item.url, wpHost)}
+                href={resolveUrl(item.url, wpHost, currentLang)}
                 className={`nav-link${hasChildren ? ' dropdown-toggle' : ''}`}
                 onClick={hasChildren ? (e: { preventDefault: () => void }) => {
                     e.preventDefault();
@@ -97,7 +109,7 @@ function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
                     {children.filter(c => !isLangItem(c)).map((child) => (
                         <Link
                             key={child.id}
-                            href={resolveUrl(child.url, wpHost)}
+                            href={resolveUrl(child.url, wpHost, currentLang)}
                             className="dropdown-item"
                             onClick={() => setOpen(false)}
                         >
@@ -112,6 +124,9 @@ function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
 
 export default function NavMenu({ menuItems, wpHost }: NavMenuProps) {
     const [mobileOpen, setMobileOpen] = useState(false);
+    const pathname = usePathname();
+    const segments = pathname.split('/');
+    const currentLang = segments[1] || 'en';
 
     return (
         <>
@@ -129,7 +144,7 @@ export default function NavMenu({ menuItems, wpHost }: NavMenuProps) {
             <div className={`collapse navbar-collapse${mobileOpen ? ' show' : ''}`} id="navbarNavDropdown">
                 <ul className="navbar-nav ml-auto" id="main-menu">
                     {Array.isArray(menuItems) && menuItems.map((item) => (
-                        <DropdownItem key={item.id} item={item} wpHost={wpHost} />
+                        <DropdownItem key={item.id} item={item} wpHost={wpHost} currentLang={currentLang} />
                     ))}
                 </ul>
             </div>
