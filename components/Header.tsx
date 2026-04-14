@@ -110,6 +110,9 @@ export default async function Header() {
                         <DeskToggle />
 
                     </div>
+                    <li>
+    <LanguageSwitcher />
+</li>
                 </nav>
             </header>
         </div>
