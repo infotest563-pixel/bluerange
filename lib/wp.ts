@@ -117,3 +117,39 @@ export async function renderShortcode(code: string) {
         return '';
     }
 }
+
+// Lang-explicit versions for [lang]/[slug] routes
+export async function getSettingsWithLang(lang: string) {
+    const res = await fetch(`${WP}/wp-json/headless/v1/site-settings?lang=${lang}`, {
+        next: { revalidate: 60 },
+        headers: { 'User-Agent': UA },
+    } as RequestInit);
+    if (!res.ok) return {};
+    const data = await res.json();
+    return {
+        show_on_front: data.show_on_front,
+        page_on_front: Number(data.page_on_front),
+        page_for_posts: Number(data.page_for_posts),
+        options: data.options,
+        footer_form_html: data.footer_form_html,
+        custom_logo_url: data.custom_logo_url,
+    };
+}
+
+export async function getPageBySlugWithLang(slug: string, lang: string) {
+    const res = await fetch(
+        `${WP}/wp-json/wp/v2/pages?slug=${slug}&_embed&lang=${lang}&acf_format=standard`,
+        { next: { revalidate: 60 } } as RequestInit
+    );
+    const data = await res.json();
+    return data[0] || null;
+}
+
+export async function getPostBySlugWithLang(slug: string, lang: string) {
+    const res = await fetch(
+        `${WP}/wp-json/wp/v2/posts?slug=${slug}&_embed&lang=${lang}&acf_format=standard`,
+        { next: { revalidate: 60 } } as RequestInit
+    );
+    const data = await res.json();
+    return data[0] || null;
+}
