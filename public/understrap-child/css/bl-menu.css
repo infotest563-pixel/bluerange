@@ -72,11 +72,12 @@ header#wrapper-navbar .container-fluid > div {
 }
 .deskside-inner i {
     color: #fff;
-    padding: 16px 10px;
+    padding: 10px 12px;
     background: var(--br-blue);
     line-height: 16px;
     margin: 10px 0 0 10px;
     border-radius: 10px;
+    cursor: pointer;
 }
 .deskside-content { padding:30px; }
 
