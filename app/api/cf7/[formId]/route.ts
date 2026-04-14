@@ -73,12 +73,16 @@ export async function POST(
     const { formId } = await params;
     try {
         const incoming = await req.formData();
+        
+        // Get the GUID for WordPress submission
+        const info = FORM_MAP[formId];
+        const guid = info?.guid || formId;
 
         const body = new FormData();
-        body.append('_wpcf7', formId);
+        body.append('_wpcf7', guid);
         body.append('_wpcf7_version', '6.1.3');
         body.append('_wpcf7_locale', 'en_US');
-        body.append('_wpcf7_unit_tag', `wpcf7-f${formId}-o1`);
+        body.append('_wpcf7_unit_tag', `wpcf7-f${guid}-o1`);
         body.append('_wpcf7_container_post', '0');
         body.append('_wpcf7_posted_data_hash', '');
 
@@ -89,7 +93,7 @@ export async function POST(
         }
 
         const res = await fetch(
-            `${WP}/wp-json/contact-form-7/v1/contact-forms/${formId}/feedback`,
+            `${WP}/wp-json/contact-form-7/v1/contact-forms/${guid}/feedback`,
             { method: 'POST', body }
         );
 

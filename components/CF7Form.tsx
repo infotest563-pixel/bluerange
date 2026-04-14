@@ -56,13 +56,7 @@ export default function CF7Form({ formId, unitTag, submitLabel = 'Submit Request
         setStatus('loading');
 
         const body = new FormData();
-        body.append('_wpcf7', String(formId));
-        body.append('_wpcf7_version', '6.1.3');
-        body.append('_wpcf7_locale', 'en_US');
-        body.append('_wpcf7_unit_tag', unitTag);
-        body.append('_wpcf7_container_post', '0');
-        body.append('_wpcf7_posted_data_hash', '');
-
+        
         fieldNames.forEach((name: string) => {
             body.append(name, values[name] || '');
         });
