@@ -2,46 +2,57 @@
 
 import { useState, useEffect } from 'react';
 
+interface CF7Field {
+    name: string;
+    type: 'text' | 'email' | 'tel' | 'textarea' | 'select';
+    placeholder?: string;
+    required?: boolean;
+    half?: boolean;
+    options?: string[];
+}
+
 interface CF7FormProps {
     formId: number;
     unitTag: string;
     submitLabel?: string;
-    // Optional override fields — if not provided, fetched from WP
-    fields?: { name: string; type: string; placeholder?: string; required?: boolean; half?: boolean }[];
+    fields?: CF7Field[];
 }
 
 export default function CF7Form({ formId, unitTag, submitLabel = 'Submit Request', fields: overrideFields }: CF7FormProps) {
-    const [fields, setFields] = useState<string[]>([]);
+    const [fieldNames, setFieldNames] = useState<string[]>([]);
     const [values, setValues] = useState<Record<string, string>>({});
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [message, setMessage] = useState('');
     const [ready, setReady] = useState(false);
 
     useEffect(() => {
-        if (overrideFields) {
-            const names = overrideFields.map(f => f.name);
-            setFields(names);
-            setValues(Object.fromEntries(names.map(n => [n, ''])));
+        if (overrideFields && overrideFields.length > 0) {
+            const names = overrideFields.map((f: CF7Field) => f.name);
+            setFieldNames(names);
+            const initVals: Record<string, string> = {};
+            overrideFields.forEach((f: CF7Field) => {
+                initVals[f.name] = f.options?.[0] || '';
+            });
+            setValues(initVals);
             setReady(true);
             return;
         }
-        // Fetch real field names from WP via our API proxy
         fetch(`/api/cf7/${formId}`)
             .then(r => r.json())
             .then(data => {
                 const names: string[] = data.fields || [];
-                if (names.length === 0) {
-                    console.warn(`[CF7Form] No fields found for form ${formId}`);
-                }
-                setFields(names);
-                setValues(Object.fromEntries(names.map((n: string) => [n, ''])));
+                setFieldNames(names);
+                const initVals: Record<string, string> = {};
+                names.forEach((n: string) => { initVals[n] = ''; });
+                setValues(initVals);
                 setReady(true);
             })
             .catch(() => setReady(true));
-    }, [formId, overrideFields]);
+    }, [formId]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        e.stopPropagation();
         setStatus('loading');
 
         const body = new FormData();
@@ -52,18 +63,19 @@ export default function CF7Form({ formId, unitTag, submitLabel = 'Submit Request
         body.append('_wpcf7_container_post', '0');
         body.append('_wpcf7_posted_data_hash', '');
 
-        fields.forEach(name => {
+        fieldNames.forEach((name: string) => {
             body.append(name, values[name] || '');
         });
 
         try {
             const res = await fetch(`/api/cf7/${formId}`, { method: 'POST', body });
             const json = await res.json();
-
             if (json.status === 'mail_sent') {
                 setStatus('success');
                 setMessage(json.message || 'Thank you! Your message has been sent.');
-                setValues(Object.fromEntries(fields.map(n => [n, ''])));
+                const cleared: Record<string, string> = {};
+                fieldNames.forEach((n: string) => { cleared[n] = ''; });
+                setValues(cleared);
                 setTimeout(() => setStatus('idle'), 6000);
             } else {
                 setStatus('error');
@@ -76,18 +88,27 @@ export default function CF7Form({ formId, unitTag, submitLabel = 'Submit Request
         }
     };
 
-    if (!ready) return <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>Loading form...</div>;
+    if (!ready) {
+        return <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>Loading form...</div>;
+    }
 
     return (
-        <form onSubmit={handleSubmit} className="wpcf7-form">
+        <form
+            onSubmit={handleSubmit}
+            className="wpcf7-form"
+            action="#"
+            method="post"
+        >
             <div className="row">
-                {fields.map(name => {
-                    const override = overrideFields?.find(f => f.name === name);
-                    const isTextarea = override?.type === 'textarea' || name.includes('message') || name.includes('textarea') || name.includes('text-area');
-                    const isEmail = override?.type === 'email' || name.includes('email') || name.includes('mail');
-                    const isTel = override?.type === 'tel' || name.includes('phone') || name.includes('mobile') || name.includes('tel') || name.includes('number');
+                {fieldNames.map((name: string) => {
+                    const override = overrideFields?.find((f: CF7Field) => f.name === name);
+                    const fieldType = override?.type || 'text';
+                    const isTextarea = fieldType === 'textarea';
+                    const isSelect = fieldType === 'select';
+                    const isEmail = fieldType === 'email';
+                    const isTel = fieldType === 'tel';
                     const isHalf = override?.half ?? false;
-                    const placeholder = override?.placeholder || name.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                    const placeholder = override?.placeholder || name.replace(/[-_]/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
                     const inputType = isEmail ? 'email' : isTel ? 'tel' : 'text';
 
                     return (
@@ -99,9 +120,26 @@ export default function CF7Form({ formId, unitTag, submitLabel = 'Submit Request
                                     rows={5}
                                     className="wpcf7-form-control wpcf7-textarea form-control"
                                     value={values[name] || ''}
-                                    onChange={e => setValues(v => ({ ...v, [name]: e.target.value }))}
+                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                                        setValues((v: Record<string, string>) => ({ ...v, [name]: e.target.value }))
+                                    }
                                     style={{ width: '100%' }}
                                 />
+                            ) : isSelect ? (
+                                <select
+                                    name={name}
+                                    required={override?.required}
+                                    className="wpcf7-form-control wpcf7-select form-control"
+                                    value={values[name] || ''}
+                                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                                        setValues((v: Record<string, string>) => ({ ...v, [name]: e.target.value }))
+                                    }
+                                    style={{ width: '100%' }}
+                                >
+                                    {(override?.options || []).map((opt: string) => (
+                                        <option key={opt} value={opt}>{opt}</option>
+                                    ))}
+                                </select>
                             ) : (
                                 <input
                                     type={inputType}
@@ -110,7 +148,9 @@ export default function CF7Form({ formId, unitTag, submitLabel = 'Submit Request
                                     required={override?.required}
                                     className={`wpcf7-form-control wpcf7-${inputType} form-control`}
                                     value={values[name] || ''}
-                                    onChange={e => setValues(v => ({ ...v, [name]: e.target.value }))}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        setValues((v: Record<string, string>) => ({ ...v, [name]: e.target.value }))
+                                    }
                                     style={{ width: '100%' }}
                                 />
                             )}
@@ -140,6 +180,6 @@ export default function CF7Form({ formId, unitTag, submitLabel = 'Submit Request
                     {message}
                 </div>
             )}
-3        </form>
+        </form>
     );
 }
