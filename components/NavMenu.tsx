@@ -57,6 +57,10 @@ function resolveUrl(url: string, wpHost: string): string {
     if (resolved !== '/' && resolved.endsWith('/')) {
         resolved = resolved.slice(0, -1);
     }
+    // Remove /sv/ prefix from Swedish URLs
+    if (resolved.startsWith('/sv/')) {
+        resolved = resolved.replace('/sv/', '/');
+    }
     return resolved;
 }
 
