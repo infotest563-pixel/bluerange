@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 interface MenuItem {
     id: string | number;
@@ -42,13 +43,31 @@ function cleanTitle(html: string): string {
     return html.replace(/<img[^>]*src="data:image[^"]*"[^>]*\/?>/gi, '').trim();
 }
 
-function resolveUrl(url: string, wpHost: string): string {
+function resolveUrl(url: string, wpHost: string, currentLang: string): string {
     if (!url || url === '#' || url === '#pll_switcher') return '#';
-    if (url.startsWith(wpHost)) return url.replace(wpHost, '') || '/';
-    return url;
+    let resolved = url;
+    if (url.startsWith(wpHost)) {
+        resolved = url.replace(wpHost, '') || '/';
+    }
+
+    // Ensure the language segment is preserved if it exists in the current URL
+    const validLangs = ['en', 'sv'];
+    if (validLangs.includes(currentLang)) {
+        // If resolved URL doesn't already start with a lang segment, prepend it
+        const segments = resolved.split('/').filter(Boolean);
+        if (segments.length === 0 || !validLangs.includes(segments[0])) {
+            resolved = `/${currentLang}${resolved === '/' ? '' : resolved}`;
+        }
+    }
+
+    // Strip trailing slash (except for root path)
+    if (resolved !== '/' && resolved.endsWith('/')) {
+        resolved = resolved.slice(0, -1);
+    }
+    return resolved;
 }
 
-function SidebarMenuItem({ item, wpHost, onClose }: { item: MenuItem; wpHost: string; onClose: () => void }) {
+function SidebarMenuItem({ item, wpHost, onClose, currentLang }: { item: MenuItem; wpHost: string; onClose: () => void; currentLang: string }) {
     const [open, setOpen] = useState(false);
     const children = getChildren(item).filter(c => !isLangItem(c));
     const hasChildren = children.length > 0;
@@ -59,7 +78,7 @@ function SidebarMenuItem({ item, wpHost, onClose }: { item: MenuItem; wpHost: st
         <li style={{ listStyle: 'none', borderBottom: '1px solid #eee' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Link
-                    href={resolveUrl(item.url, wpHost)}
+                    href={resolveUrl(item.url, wpHost, currentLang)}
                     onClick={hasChildren ? undefined : onClose}
                     style={{ display: 'block', padding: '10px 0', color: '#333', textDecoration: 'none', fontWeight: 500, flex: 1 }}
                 >
@@ -80,7 +99,7 @@ function SidebarMenuItem({ item, wpHost, onClose }: { item: MenuItem; wpHost: st
                     {children.map(child => (
                         <li key={child.id} style={{ listStyle: 'none', borderTop: '1px solid #f0f0f0' }}>
                             <Link
-                                href={resolveUrl(child.url, wpHost)}
+                                href={resolveUrl(child.url, wpHost, currentLang)}
                                 onClick={onClose}
                                 style={{ display: 'block', padding: '8px 0', color: '#555', textDecoration: 'none', fontSize: '14px' }}
                             >
@@ -96,6 +115,9 @@ function SidebarMenuItem({ item, wpHost, onClose }: { item: MenuItem; wpHost: st
 
 export default function DeskToggle({ menuItems = [], wpHost = '' }: DeskToggleProps) {
     const [open, setOpen] = useState(false);
+    const pathname = usePathname();
+    const segments = pathname.split('/');
+    const currentLang = segments[1] || 'en';
 
     useEffect(() => {
         document.body.style.overflow = open ? 'hidden' : '';
@@ -140,6 +162,7 @@ export default function DeskToggle({ menuItems = [], wpHost = '' }: DeskTogglePr
                                     item={item}
                                     wpHost={wpHost}
                                     onClose={() => setOpen(false)}
+                                    currentLang={currentLang}
                                 />
                             ))}
                         </ul>
