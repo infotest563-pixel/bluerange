@@ -1,9 +1,13 @@
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 
 const WP = 'https://dev-bluerange.pantheonsite.io';
 
 async function getLang(): Promise<string> {
     try {
+        const headerList = await headers();
+        const headerLang = headerList.get('x-lang');
+        if (headerLang) return headerLang;
+
         const cookieStore = await cookies();
         return cookieStore.get('lang')?.value || 'en';
     } catch {

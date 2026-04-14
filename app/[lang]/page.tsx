@@ -1,4 +1,4 @@
-import { getSettingsWithLang, getPageBySlugWithLang } from '../../lib/wp';
+import { getSettingsWithLang, getPageById } from '../../lib/wp';
 import { notFound } from 'next/navigation';
 import WordPressPageRenderer from '../../components/pages/WordPressPageRenderer';
 
@@ -21,11 +21,7 @@ export default async function LangHomePage({
     }
 
     // Fetch the front page for this language
-    const res = await fetch(
-        `https://dev-bluerange.pantheonsite.io/wp-json/wp/v2/pages/${settings.page_on_front}?_embed&lang=${lang}&acf_format=standard`,
-        { next: { revalidate: 60 } } as RequestInit
-    );
-    const page = await res.json();
+    const page = await getPageById(settings.page_on_front, lang);
 
     if (!page || !page.acf) {
         notFound();

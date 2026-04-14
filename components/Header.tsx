@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getMenu, getSite, getSettings } from '../lib/wp';
+import { getMenu, getSite, getSettings, getLang } from '../lib/wp';
 import DeskToggle from './DeskToggle';
 import NavMenu from './NavMenu';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -7,9 +7,10 @@ import LanguageSwitcher from './LanguageSwitcher';
 const WP_HOST = 'https://dev-bluerange.pantheonsite.io';
 
 export default async function Header() {
-    const siteData = await getSite();
-    const settings = await getSettings();
-    let menuItems = await getMenu('primary');
+    const lang = await getLang();
+    const siteData = await getSite(lang);
+    const settings = await getSettings(lang);
+    let menuItems = await getMenu('primary', lang);
 
     let logoUrl: string | null = null;
 
