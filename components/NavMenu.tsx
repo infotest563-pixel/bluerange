@@ -16,34 +16,26 @@ interface NavMenuProps {
     wpHost: string;
 }
 
-// Detect if a menu item is the Polylang language switcher
-function isLangSwitcher(item: MenuItem): boolean {
+// Filter out Polylang language switcher items — we render our own
+function isLangItem(item: MenuItem): boolean {
+    const classes = item.classes || [];
     return (
         item.url === '#pll_switcher' ||
-        item.url === '#' && item.title.includes('data:image') ||
-        (Array.isArray(item.classes) && (
-            item.classes.includes('pll-parent-menu-item') ||
-            item.classes.includes('lang-item')
-        )) ||
         item.title.includes('data:image') ||
-        (item.children?.some(c =>
-            Array.isArray(c.classes) && (
-                c.classes.includes('lang-item') ||
-                c.classes.includes('current-lang') ||
-                c.classes.includes('lang-item-sv') ||
-                c.classes.includes('lang-item-en')
-            )
-        ) ?? false)
+        classes.some(c => ['pll-parent-menu-item', 'lang-item', 'lang-item-sv', 'lang-item-en'].includes(c)) ||
+        (item.children ?? []).some(child =>
+            (child.classes ?? []).some(c => ['lang-item', 'lang-item-sv', 'lang-item-en', 'current-lang'].includes(c))
+        )
     );
 }
 
-// Strip any base64 images from title HTML — safety net
+// Remove base64 images from any title string
 function cleanTitle(html: string): string {
     return html.replace(/<img[^>]*src="data:image[^"]*"[^>]*\/?>/gi, '').trim();
 }
 
 function resolveUrl(url: string, wpHost: string): string {
-    if (!url) return '#';
+    if (!url || url === '#' || url === '#pll_switcher') return '#';
     if (url.startsWith(wpHost)) return url.replace(wpHost, '') || '/';
     return url;
 }
@@ -53,20 +45,16 @@ function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
     const ref = useRef<HTMLLIElement>(null);
     const hasChildren = !!(item.children && item.children.length > 0);
 
+    // Close on outside click
     useEffect(() => {
         const handler = (e: MouseEvent) => {
-            if (ref.current && !ref.current.contains(e.target as Node)) {
-                setOpen(false);
-            }
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
         };
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
     }, []);
 
-    // Replace Polylang switcher with our own component
-    if (isLangSwitcher(item)) {
-        return null;
-    }
+    if (isLangItem(item)) return null;
 
     const liClasses = ['nav-item', ...(item.classes || [])];
     if (hasChildren) liClasses.push('dropdown', 'menu-item-has-children');
@@ -76,14 +64,17 @@ function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
             <Link
                 href={resolveUrl(item.url, wpHost)}
                 className={`nav-link${hasChildren ? ' dropdown-toggle' : ''}`}
-                onClick={hasChildren ? (e: React.MouseEvent) => { e.preventDefault(); setOpen((o: boolean) => !o); } : undefined}
+                onClick={hasChildren ? (e: { preventDefault: () => void }) => {
+                    e.preventDefault();
+                    setOpen(o => !o);
+                } : undefined}
                 aria-expanded={hasChildren ? open : undefined}
             >
                 <span dangerouslySetInnerHTML={{ __html: cleanTitle(item.title) }} />
             </Link>
-            {hasChildren && (
-                <div className={`dropdown-menu${open ? ' show' : ''}`}>
-                    {item.children!.map((child) => (
+            {hasChildren && open && (
+                <div className="dropdown-menu show">
+                    {item.children!.filter(c => !isLangItem(c)).map((child) => (
                         <Link
                             key={child.id}
                             href={resolveUrl(child.url, wpHost)}
@@ -110,7 +101,7 @@ export default function NavMenu({ menuItems, wpHost }: NavMenuProps) {
                 aria-controls="navbarNavDropdown"
                 aria-expanded={mobileOpen}
                 aria-label="Toggle navigation"
-                onClick={() => setMobileOpen((o: boolean) => !o)}
+                onClick={() => setMobileOpen(o => !o)}
             >
                 <span className="navbar-toggler-icon"></span>
             </button>

@@ -10,10 +10,8 @@ interface WPLang {
     is_default: boolean;
 }
 
-// WP returns 'us' for English — override to 'gb'
-const flagOverride: Record<string, string> = { en: 'gb' };
+const FLAG_OVERRIDE: Record<string, string> = { en: 'gb' };
 
-// Static fallback in case API is slow/unavailable
 const FALLBACK: WPLang[] = [
     { name: 'English', slug: 'en', flag_code: 'gb', home_url: '/', is_default: true },
     { name: 'Svenska', slug: 'sv', flag_code: 'se', home_url: '/', is_default: false },
@@ -39,7 +37,9 @@ export default function LanguageSwitcher() {
 
         fetch('https://dev-bluerange.pantheonsite.io/wp-json/pll/v1/languages')
             .then(r => r.json())
-            .then((data: WPLang[]) => { if (Array.isArray(data) && data.length) setLangs(data); })
+            .then((data: WPLang[]) => {
+                if (Array.isArray(data) && data.length > 0) setLangs(data);
+            })
             .catch(() => {});
     }, []);
 
@@ -50,9 +50,9 @@ export default function LanguageSwitcher() {
     };
 
     return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            {langs.map((lang) => {
-                const flagCode = flagOverride[lang.slug] || lang.flag_code;
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {langs.map((lang: WPLang) => {
+                const flagCode = FLAG_OVERRIDE[lang.slug] || lang.flag_code;
                 const isActive = current === lang.slug;
                 return (
                     <button
@@ -62,16 +62,15 @@ export default function LanguageSwitcher() {
                         style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '4px',
-                            border: 'none',
+                            gap: '5px',
                             background: 'transparent',
+                            border: 'none',
                             cursor: 'pointer',
-                            padding: '2px 4px',
-                            opacity: isActive ? 1 : 0.55,
+                            padding: '2px 0',
+                            opacity: isActive ? 1 : 0.5,
                             borderBottom: isActive ? '2px solid #fff' : '2px solid transparent',
-                            borderRadius: 0,
-                            lineHeight: 1,
                             transition: 'opacity 0.2s',
+                            lineHeight: 1,
                         }}
                     >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -81,9 +80,9 @@ export default function LanguageSwitcher() {
                             width={20}
                             height={14}
                             alt={lang.name}
-                            style={{ display: 'block' }}
+                            style={{ display: 'block', flexShrink: 0 }}
                         />
-                        <span style={{ color: '#fff', fontSize: '13px', fontWeight: isActive ? 600 : 400 }}>
+                        <span style={{ color: '#fff', fontSize: '13px', fontWeight: isActive ? 600 : 400, whiteSpace: 'nowrap' }}>
                             {lang.name}
                         </span>
                     </button>

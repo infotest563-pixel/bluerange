@@ -13,39 +13,22 @@ export default async function Header() {
 
     let logoUrl: string | null = null;
 
-    // 1. Try ACF Options (Preferred)
-    // if (settings?.options?.site_logo) {
-    //     if (typeof settings.options.site_logo === 'string') {
-    //         logoUrl = settings.options.site_logo;
-    //     } else if (settings.options.site_logo.url) {
-    //         logoUrl = settings.options.site_logo.url;
-    //     }
-    // }
-
-    // 2. Try Site Settings (Legacy Endpoint)
     if (!logoUrl && settings?.custom_logo_url) {
         logoUrl = settings.custom_logo_url;
     }
-
-    // 3. Try Site Data (Customizer - Fallback, might contain flags)
     if (!logoUrl && siteData?.logo) {
         const potentialLogo = typeof siteData.logo === 'string' ? siteData.logo : siteData.logo.url;
-        // Avoid base64 flags
         if (potentialLogo && !potentialLogo.startsWith('data:image')) {
             logoUrl = potentialLogo;
         }
     }
 
-    // Fetch Menu with Fallbacks
-    if (!menuItems || menuItems.length === 0) {
-        menuItems = await getMenu('primary-menu');
-    }
-    if (!menuItems || menuItems.length === 0) {
-        menuItems = await getMenu('main-menu');
-    }
+    if (!menuItems || menuItems.length === 0) menuItems = await getMenu('primary-menu');
+    if (!menuItems || menuItems.length === 0) menuItems = await getMenu('main-menu');
 
     return (
         <div suppressHydrationWarning>
+            {/* Top bar */}
             <div className="top-header">
                 <div className="container">
                     <div className="row">
@@ -64,9 +47,9 @@ export default async function Header() {
                                             <span>Support@bluerange.se</span>
                                         </a>
                                     </li>
-                                    {/* <li>
+                                    <li>
                                         <LanguageSwitcher />
-                                    </li> */}
+                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -74,16 +57,11 @@ export default async function Header() {
                 </div>
             </div>
 
+            {/* Main nav */}
             <header id="wrapper-navbar">
-                <a className="skip-link screen-reader-text sr-only" href="#content">
-                    Skip to content
-                </a>
-
+                <a className="skip-link screen-reader-text sr-only" href="#content">Skip to content</a>
                 <nav id="main-nav" className="navbar navbar-expand-md navbar-dark bg-primary" aria-labelledby="main-nav-label">
-                    <h2 id="main-nav-label" className="screen-reader-text sr-only">
-                        Main Navigation
-                    </h2>
-
+                    <h2 id="main-nav-label" className="screen-reader-text sr-only">Main Navigation</h2>
                     <div className="container">
                         <Link href="/" className="navbar-brand custom-logo-link" rel="home">
                             {logoUrl ? (
@@ -98,23 +76,12 @@ export default async function Header() {
                             ) : (
                                 <span>{siteData?.name || 'Bluerange'}</span>
                             )}
-
                         </Link>
 
-
-                        <NavMenu
-                            menuItems={menuItems}
-                            wpHost={WP_HOST}
-
-                        />
-                        <li>
-                            <LanguageSwitcher />
-                        </li>
+                        <NavMenu menuItems={menuItems} wpHost={WP_HOST} />
 
                         <DeskToggle />
-
                     </div>
-
                 </nav>
             </header>
         </div>
