@@ -54,7 +54,7 @@ function resolveUrl(url: string, wpHost: string, currentLang: string): string {
     if (url.startsWith(wpHost)) {
         resolved = url.replace(wpHost, '') || '/';
     }
-    
+
     // Ensure the language segment is preserved if it exists in the current URL
     const validLangs = ['en', 'sv'];
     if (validLangs.includes(currentLang)) {
