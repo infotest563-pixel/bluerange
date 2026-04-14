@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getMedia } from '../../lib/wp';
+import { getMedia, stripCF7Forms } from '../../lib/wp';
 import CF7Form from '../CF7Form';
 
 const WP_HOST = 'https://dev-bluerange.pantheonsite.io';
@@ -35,8 +35,8 @@ export default async function CoLocation({ page }: { page: any }) {
                         <div className="bl-box col-sm-12 col-lg-12">
                             <div className="wd-100 text-center">
                                 <h1 dangerouslySetInnerHTML={{ __html: title }} />
-                                {acf.banner_content && <div dangerouslySetInnerHTML={{ __html: acf.banner_content }} />}
-                                {acf.banner_subcontent && <div dangerouslySetInnerHTML={{ __html: acf.banner_subcontent }} />}
+                                {acf.banner_content && <div dangerouslySetInnerHTML={{ __html: stripCF7Forms(acf.banner_content) }} />}
+                                {acf.banner_subcontent && <div dangerouslySetInnerHTML={{ __html: stripCF7Forms(acf.banner_subcontent) }} />}
                             </div>
                         </div>
                     </div>
@@ -53,7 +53,7 @@ export default async function CoLocation({ page }: { page: any }) {
                                     <span dangerouslySetInnerHTML={{ __html: title || '' }} />
                                     {acf.you_can_trust_title && <span dangerouslySetInnerHTML={{ __html: acf.you_can_trust_title }} />}
                                 </h2>
-                                {acf.you_can_trust_subtitle && <div dangerouslySetInnerHTML={{ __html: acf.you_can_trust_subtitle }} />}
+                                {acf.you_can_trust_subtitle && <div dangerouslySetInnerHTML={{ __html: stripCF7Forms(acf.you_can_trust_subtitle) }} />}
                             </div>
                         </div>
                     </div>
