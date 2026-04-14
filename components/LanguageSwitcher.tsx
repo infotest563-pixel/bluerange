@@ -14,9 +14,9 @@ const FLAG_OVERRIDE: Record<string, string> = { en: 'gb' };
 
 const FALLBACK: WPLang[] = [
     { name: 'English', slug: 'en', flag_code: 'gb', home_url: '/', is_default: true },
-    { name: '', slug: 'sv', flag_code: 'se', home_url: '/', is_default: false },
+    { name: 'Svenska', slug: 'sv', flag_code: 'se', home_url: '/', is_default: false },
 ];
-
+    
 function getCookie(name: string): string {
     if (typeof document === 'undefined') return '';
     const m = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
@@ -107,7 +107,7 @@ export default function LanguageSwitcher() {
                     border: '1px solid #ddd',
                     borderRadius: '4px',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                    minWidth: '130px',
+                    minWidth: '44px',
                     zIndex: 999,
                     overflow: 'hidden',
                 }}>
@@ -141,9 +141,8 @@ export default function LanguageSwitcher() {
                                     width={20}
                                     height={14}
                                     alt={lang.name}
-                                    style={{ display: 'block', flexShrink: 0 }}
+                                    style={{ display: 'block' }}
                                 />
-                                <span>{lang.name}</span>
                             </button>
                         );
                     })}
