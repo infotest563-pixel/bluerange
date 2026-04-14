@@ -47,9 +47,7 @@ export default async function Header() {
                                             <span>Support@bluerange.se</span>
                                         </a>
                                     </li>
-                                    <li>
-                                        <LanguageSwitcher />
-                                    </li>
+                                    
                                 </ul>
                             </div>
                         </div>
@@ -79,6 +77,7 @@ export default async function Header() {
                         </Link>
 
                         <NavMenu menuItems={menuItems} wpHost={WP_HOST} />
+                        <LanguageSwitcher />
 
                         <DeskToggle menuItems={menuItems} wpHost={WP_HOST} />
                     </div>
