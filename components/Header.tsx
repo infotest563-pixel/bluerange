@@ -83,7 +83,6 @@ export default async function Header() {
                         <DeskToggle menuItems={menuItems} wpHost={WP_HOST} />
                     </div>
                 </nav>
-                </nav>
             </header>
         </div>
     );
