@@ -16,9 +16,24 @@ export default async function Footer() {
     ]);
 
     const resolveUrl = (url: string) => {
-        if (!url) return '#';
-        if (url.startsWith(WP_HOST)) return url.replace(WP_HOST, '') || '/';
-        return url;
+        if (!url || url === '#') return '#';
+        let resolved = url;
+        if (url.startsWith(WP_HOST)) {
+            resolved = url.replace(WP_HOST, '') || '/';
+        }
+
+        // Prepend lang if not present
+        const validLangs = ['en', 'sv'];
+        const segments = resolved.split('/').filter(Boolean);
+        if (segments.length === 0 || !validLangs.includes(segments[0])) {
+            resolved = `/${lang}${resolved === '/' ? '' : resolved}`;
+        }
+
+        // Strip trailing slash
+        if (resolved !== '/' && resolved.endsWith('/')) {
+            resolved = resolved.slice(0, -1);
+        }
+        return resolved;
     };
 
     //return (
