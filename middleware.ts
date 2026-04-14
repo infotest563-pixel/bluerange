@@ -59,6 +59,25 @@ export function middleware(request: NextRequest) {
         });
     }
 
+    // NEW: Rewrite logic to avoid [lang] vs [slug] conflict
+    // If the URL doesn't have a lang prefix, rewrite it to include one internally.
+    if (!VALID_LANGS.includes(langSegment) && pathname !== '/' && !pathname.startsWith('/api/') && !pathname.includes('.')) {
+        const url = request.nextUrl.clone();
+        url.pathname = `/${detectedLang}${pathname}`;
+        
+        // Return a rewrite instead of a plain next()
+        const rewriteResponse = NextResponse.rewrite(url);
+        rewriteResponse.headers.set('x-lang', detectedLang);
+        if (currentCookieLang !== detectedLang) {
+            rewriteResponse.cookies.set('lang', detectedLang, {
+                path: '/',
+                maxAge: 31536000,
+                sameSite: 'lax',
+            });
+        }
+        return rewriteResponse;
+    }
+
     return finalResponse;
 }
 
