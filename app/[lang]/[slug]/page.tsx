@@ -9,7 +9,8 @@ export default async function LangSlugPage({
 }: {
     params: Promise<{ lang: string; slug: string }>;
 }) {
-    const { lang, slug } = await params;
+    const { lang } = await params;
+    const slug = decodeURIComponent((await params).slug);
 
     // If lang segment is not a valid language, treat it as a regular slug (handled by [slug] route)
     if (!VALID_LANGS.includes(lang)) {

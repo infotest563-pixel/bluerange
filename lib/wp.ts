@@ -77,12 +77,22 @@ export async function getMedia(id: number, lang?: string) {
 
 export async function getPageBySlug(slug: string, lang?: string) {
     const currentLang = lang || await getLang();
-    const res = await fetch(`${WP}/wp-json/wp/v2/pages?slug=${slug}&_embed&lang=${currentLang}&acf_format=standard`, {
+    let res = await fetch(`${WP}/wp-json/wp/v2/pages?slug=${slug}&_embed&lang=${currentLang}&acf_format=standard`, {
         next: { revalidate: 60 },
         headers: { 'User-Agent': UA },
     } as RequestInit);
-    const data = await res.json();
-    const page = data[0] || null;
+    let data = await res.json();
+
+    // Fallback if not found with lang - some slugs might be unique across languages
+    if (!Array.isArray(data) || data.length === 0) {
+        res = await fetch(`${WP}/wp-json/wp/v2/pages?slug=${slug}&_embed&acf_format=standard`, {
+            next: { revalidate: 60 },
+            headers: { 'User-Agent': UA },
+        } as RequestInit);
+        data = await res.json();
+    }
+
+    const page = (Array.isArray(data) ? data[0] : null) || null;
     if (page?.content?.rendered) {
         page.content.rendered = stripCF7Forms(page.content.rendered);
     }
@@ -99,12 +109,22 @@ export async function getPageBySlug(slug: string, lang?: string) {
 
 export async function getPostBySlug(slug: string, lang?: string) {
     const currentLang = lang || await getLang();
-    const res = await fetch(`${WP}/wp-json/wp/v2/posts?slug=${slug}&_embed&lang=${currentLang}&acf_format=standard`, {
+    let res = await fetch(`${WP}/wp-json/wp/v2/posts?slug=${slug}&_embed&lang=${currentLang}&acf_format=standard`, {
         next: { revalidate: 60 },
         headers: { 'User-Agent': UA },
     } as RequestInit);
-    const data = await res.json();
-    return data[0] || null;
+    let data = await res.json();
+
+    // Fallback
+    if (!Array.isArray(data) || data.length === 0) {
+        res = await fetch(`${WP}/wp-json/wp/v2/posts?slug=${slug}&_embed&acf_format=standard`, {
+            next: { revalidate: 60 },
+            headers: { 'User-Agent': UA },
+        } as RequestInit);
+        data = await res.json();
+    }
+
+    return (Array.isArray(data) ? data[0] : null) || null;
 }
 
 export async function getMenu(slug: string, lang?: string) {
