@@ -59,6 +59,7 @@ export async function getPageById(id: number, lang?: string) {
     const currentLang = lang || await getLang();
     const data = await fetch(`${WP}/wp-json/wp/v2/pages/${id}?_embed&lang=${currentLang}&acf_format=standard`, {
         next: { revalidate: 60 },
+        headers: { 'User-Agent': UA },
     } as RequestInit).then(r => r.json());
     if (data?.content?.rendered) {
         data.content.rendered = stripCF7Forms(data.content.rendered);
@@ -70,6 +71,7 @@ export async function getMedia(id: number, lang?: string) {
     const currentLang = lang || await getLang();
     return fetch(`${WP}/wp-json/wp/v2/media/${id}?lang=${currentLang}`, {
         next: { revalidate: 3600 },
+        headers: { 'User-Agent': UA },
     } as RequestInit).then(r => r.json());
 }
 
@@ -77,6 +79,7 @@ export async function getPageBySlug(slug: string, lang?: string) {
     const currentLang = lang || await getLang();
     const res = await fetch(`${WP}/wp-json/wp/v2/pages?slug=${slug}&_embed&lang=${currentLang}&acf_format=standard`, {
         next: { revalidate: 60 },
+        headers: { 'User-Agent': UA },
     } as RequestInit);
     const data = await res.json();
     const page = data[0] || null;
@@ -98,6 +101,7 @@ export async function getPostBySlug(slug: string, lang?: string) {
     const currentLang = lang || await getLang();
     const res = await fetch(`${WP}/wp-json/wp/v2/posts?slug=${slug}&_embed&lang=${currentLang}&acf_format=standard`, {
         next: { revalidate: 60 },
+        headers: { 'User-Agent': UA },
     } as RequestInit);
     const data = await res.json();
     return data[0] || null;
@@ -108,6 +112,7 @@ export async function getMenu(slug: string, lang?: string) {
     try {
         const res = await fetch(`${WP}/wp-json/headless/v1/menus/${slug}?lang=${currentLang}`, {
             next: { revalidate: 300 },
+            headers: { 'User-Agent': UA },
         } as RequestInit);
         if (!res.ok) return [];
         const data = await res.json();
@@ -159,7 +164,7 @@ export async function getSettingsWithLang(lang: string) {
 export async function getPageBySlugWithLang(slug: string, lang: string) {
     const res = await fetch(
         `${WP}/wp-json/wp/v2/pages?slug=${slug}&_embed&lang=${lang}&acf_format=standard`,
-        { next: { revalidate: 60 } } as RequestInit
+        { next: { revalidate: 60 }, headers: { 'User-Agent': UA } } as RequestInit
     );
     const data = await res.json();
     const page = data[0] || null;
@@ -175,7 +180,7 @@ export async function getPageBySlugWithLang(slug: string, lang: string) {
 export async function getPostBySlugWithLang(slug: string, lang: string) {
     const res = await fetch(
         `${WP}/wp-json/wp/v2/posts?slug=${slug}&_embed&lang=${lang}&acf_format=standard`,
-        { next: { revalidate: 60 } } as RequestInit
+        { next: { revalidate: 60 }, headers: { 'User-Agent': UA } } as RequestInit
     );
     const data = await res.json();
     return data[0] || null;
