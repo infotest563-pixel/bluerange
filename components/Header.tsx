@@ -105,16 +105,16 @@ export default async function Header() {
                         <NavMenu
                             menuItems={menuItems}
                             wpHost={WP_HOST}
-                            
+
                         />
-                         <li>
-    <LanguageSwitcher />
-</li>
+                        <li>
+                            <LanguageSwitcher />
+                        </li>
 
                         <DeskToggle />
 
                     </div>
-                   
+
                 </nav>
             </header>
         </div>
