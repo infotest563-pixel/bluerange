@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 
+const WP_BASE = 'https://dev-bluerange.pantheonsite.io';
+
 interface CF7Field {
     name: string;
     type: 'text' | 'email' | 'tel' | 'textarea' | 'select';
@@ -17,6 +19,16 @@ interface CF7FormProps {
     submitLabel?: string;
     fields?: CF7Field[];
 }
+
+// Map of form IDs to their GUIDs
+const FORM_GUID_MAP: Record<number, string> = {
+    947: '8e88d3b',
+    948: 'cbbde7a',
+    955: '1465da7',
+    957: 'b990f59',
+    943: 'b8c2759',
+    70: '70',
+};
 
 export default function CF7Form({ formId, unitTag, submitLabel = 'Submit Request', fields: overrideFields }: CF7FormProps) {
     const [fieldNames, setFieldNames] = useState<string[]>([]);
@@ -37,33 +49,36 @@ export default function CF7Form({ formId, unitTag, submitLabel = 'Submit Request
             setReady(true);
             return;
         }
-        fetch(`/api/cf7/${formId}`)
-            .then(r => r.json())
-            .then(data => {
-                const names: string[] = data.fields || [];
-                setFieldNames(names);
-                const initVals: Record<string, string> = {};
-                names.forEach((n: string) => { initVals[n] = ''; });
-                setValues(initVals);
-                setReady(true);
-            })
-            .catch(() => setReady(true));
-    }, [formId]);
+        setReady(true);
+    }, [formId, overrideFields]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         e.stopPropagation();
         setStatus('loading');
 
+        // Get the GUID for this form
+        const guid = FORM_GUID_MAP[formId] || String(formId);
+
         const body = new FormData();
         
+        // Add CF7 required fields
+        body.append('_wpcf7', guid);
+        body.append('_wpcf7_version', '6.1.3');
+        body.append('_wpcf7_locale', 'en_US');
+        body.append('_wpcf7_unit_tag', unitTag);
+        body.append('_wpcf7_container_post', '0');
+        body.append('_wpcf7_posted_data_hash', '');
+
         // Add all form fields
         fieldNames.forEach((name: string) => {
             body.append(name, values[name] || '');
         });
 
         try {
-            const res = await fetch(`/api/cf7/${formId}`, { method: 'POST', body });
+            // Submit directly to WordPress (like ContactForm does)
+            const wpEndpoint = `${WP_BASE}/wp-json/contact-form-7/v1/contact-forms/${guid}/feedback`;
+            const res = await fetch(wpEndpoint, { method: 'POST', body });
             const json = await res.json();
             
             if (json.status === 'mail_sent') {
