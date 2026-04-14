@@ -27,6 +27,18 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
         notFound();
     }
 
+    // New: Automatic localization redirect for root slugs
+    const currentLang = await import('../../lib/wp').then(m => m.getLang());
+    const pageLang = data.lang || 'en';
+    if (pageLang !== currentLang && data.translations && data.translations[currentLang]) {
+        const translatedId = data.translations[currentLang];
+        const { getPageById } = await import('../../lib/wp');
+        const translatedPage = await getPageById(translatedId, currentLang);
+        if (translatedPage?.slug) {
+            redirect(`/${currentLang}/${translatedPage.slug}`);
+        }
+    }
+
     // 4. Redirect if this is actually the homepage
     if (type === 'page' && data.id === settings.page_on_front) {
         redirect('/');

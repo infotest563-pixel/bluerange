@@ -31,6 +31,19 @@ export default async function LangSlugPage({
         notFound();
     }
 
+    // New: Automatic localization redirect
+    // If the page/post we found is NOT in the requested language, 
+    // try to find the translation in the correct language.
+    const pageLang = data.lang || 'en';
+    if (pageLang !== lang && data.translations && data.translations[lang]) {
+        const translatedId = data.translations[lang];
+        const { getPageById } = await import('../../../lib/wp');
+        const translatedPage = await getPageById(translatedId, lang);
+        if (translatedPage?.slug) {
+            redirect(`/${lang}/${translatedPage.slug}`);
+        }
+    }
+
     if (type === 'page') {
         return <WordPressPageRenderer page={data} />;
     }
