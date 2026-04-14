@@ -101,9 +101,6 @@ export default async function Header() {
 
                         </Link>
 
-                        <li>
-    <LanguageSwitcher />
-</li>
 
                         <NavMenu
                             menuItems={menuItems}
