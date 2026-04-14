@@ -169,8 +169,10 @@ export default function WordPressPageRenderer({ page }: { page: any }) {
         case 'nyheter': // Swedish
             return <News page={page} />;
         case 'products':
+        case 'produkter': // Swedish
             return <Products page={page} />;
         case 'services':
+        case 'tjanster': // Swedish
             return <Services page={page} />;
 
         // TODO: Implement other pages
