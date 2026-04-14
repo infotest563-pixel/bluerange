@@ -26,8 +26,80 @@ import { stripCF7Forms } from '../../lib/wp';
 
 export default function WordPressPageRenderer({ page }: { page: any }) {
     const slug = page.slug;
+    const template = page.template || '';
 
-    // Route to specific template components based on slug
+    // Route by template first (more reliable for multi-language)
+    if (template.includes('virtual-server')) {
+        return <VirtualServer page={page} />;
+    }
+    if (template.includes('co-location') || template.includes('colocation')) {
+        return <CoLocation page={page} />;
+    }
+    if (template.includes('s3-storage') || template.includes('storage')) {
+        return <S3Storage page={page} />;
+    }
+    if (template.includes('backup')) {
+        return <Backup page={page} />;
+    }
+    if (template.includes('infrastructure')) {
+        return <InfrastructureAsAService page={page} />;
+    }
+    if (template.includes('software-hosting')) {
+        return <SoftwareHostingAsAService page={page} />;
+    }
+    if (template.includes('software-entrepreneurs')) {
+        return <SoftwareEntrepreneurs page={page} />;
+    }
+    if (template.includes('our-partners') || template.includes('partners')) {
+        return <OurPartners page={page} />;
+    }
+    if (template.includes('microsoft')) {
+        return <Microsoft365 page={page} />;
+    }
+    if (template.includes('web-hotel') || template.includes('web-hosting')) {
+        return <WebHotel page={page} />;
+    }
+    if (template.includes('domain')) {
+        return <Domains page={page} />;
+    }
+    if (template.includes('broadband')) {
+        return <Broadband page={page} />;
+    }
+    if (template.includes('crowdsec')) {
+        return <Crowdsec page={page} />;
+    }
+    if (template.includes('security-awareness') || template.includes('awarness')) {
+        return <SecurityAwarenessTraining page={page} />;
+    }
+    if (template.includes('public-sector')) {
+        return <PublicSector page={page} />;
+    }
+    if (template.includes('about')) {
+        return <About page={page} />;
+    }
+    if (template.includes('career')) {
+        return <Career page={page} />;
+    }
+    if (template.includes('kubernetes')) {
+        return <KubernetesAsAService page={page} />;
+    }
+    if (template.includes('swedish-cloud') || template.includes('svenskt-moln')) {
+        return <SwedishCloud page={page} />;
+    }
+    if (template.includes('contact')) {
+        return <ContactUs page={page} />;
+    }
+    if (template.includes('news')) {
+        return <News page={page} />;
+    }
+    if (template.includes('product')) {
+        return <Products page={page} />;
+    }
+    if (template.includes('service')) {
+        return <Services page={page} />;
+    }
+
+    // Fallback to slug-based routing for pages without templates
     switch (slug) {
         case 'virtual-server':
         case 'virtuell-server': // Swedish
