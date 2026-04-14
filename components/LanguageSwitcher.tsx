@@ -6,15 +6,18 @@ interface WPLang {
     name: string;
     slug: string;
     flag_code: string;
-    flag_url: string;
     home_url: string;
     is_default: boolean;
 }
 
-// flag_code overrides — WP returns 'us' for English but we want 'gb'
-const flagOverride: Record<string, string> = {
-    en: 'gb',
-};
+// WP returns 'us' for English — override to 'gb'
+const flagOverride: Record<string, string> = { en: 'gb' };
+
+// Static fallback in case API is slow/unavailable
+const FALLBACK: WPLang[] = [
+    { name: 'English', slug: 'en', flag_code: 'gb', home_url: '/', is_default: true },
+    { name: 'Svenska', slug: 'sv', flag_code: 'se', home_url: '/', is_default: false },
+];
 
 function getCookie(name: string): string {
     if (typeof document === 'undefined') return '';
@@ -27,40 +30,27 @@ function setCookie(name: string, value: string) {
 }
 
 export default function LanguageSwitcher() {
-    const [langs, setLangs] = useState<WPLang[]>([]);
+    const [langs, setLangs] = useState<WPLang[]>(FALLBACK);
     const [current, setCurrent] = useState('en');
 
     useEffect(() => {
-        // Read saved lang from cookie
         const saved = getCookie('lang');
         if (saved) setCurrent(saved);
 
-        // Fetch languages from Polylang API
         fetch('https://dev-bluerange.pantheonsite.io/wp-json/pll/v1/languages')
             .then(r => r.json())
-            .then((data: WPLang[]) => {
-                if (Array.isArray(data)) setLangs(data);
-            })
-            .catch(() => {
-                // Fallback static list
-                setLangs([
-                    { name: 'English', slug: 'en', flag_code: 'gb', flag_url: '', home_url: '/', is_default: true },
-                    { name: 'Svenska', slug: 'sv', flag_code: 'se', flag_url: '', home_url: '/', is_default: false },
-                ]);
-            });
+            .then((data: WPLang[]) => { if (Array.isArray(data) && data.length) setLangs(data); })
+            .catch(() => {});
     }, []);
 
     const switchLang = (lang: WPLang) => {
         setCookie('lang', lang.slug);
         setCurrent(lang.slug);
-        // Reload current page with new language cookie
         window.location.reload();
     };
 
-    if (langs.length === 0) return null;
-
     return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             {langs.map((lang) => {
                 const flagCode = flagOverride[lang.slug] || lang.flag_code;
                 const isActive = current === lang.slug;
@@ -70,13 +60,17 @@ export default function LanguageSwitcher() {
                         onClick={() => switchLang(lang)}
                         title={lang.name}
                         style={{
-                            border: isActive ? '2px solid #0070f3' : '2px solid transparent',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            border: 'none',
                             background: 'transparent',
                             cursor: 'pointer',
-                            padding: '1px',
-                            opacity: isActive ? 1 : 0.5,
-                            borderRadius: '3px',
-                            lineHeight: 0,
+                            padding: '2px 4px',
+                            opacity: isActive ? 1 : 0.55,
+                            borderBottom: isActive ? '2px solid #fff' : '2px solid transparent',
+                            borderRadius: 0,
+                            lineHeight: 1,
                             transition: 'opacity 0.2s',
                         }}
                     >
@@ -89,6 +83,9 @@ export default function LanguageSwitcher() {
                             alt={lang.name}
                             style={{ display: 'block' }}
                         />
+                        <span style={{ color: '#fff', fontSize: '13px', fontWeight: isActive ? 600 : 400 }}>
+                            {lang.name}
+                        </span>
                     </button>
                 );
             })}
