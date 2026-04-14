@@ -49,8 +49,15 @@ function cleanTitle(html: string): string {
 
 function resolveUrl(url: string, wpHost: string): string {
     if (!url || url === '#' || url === '#pll_switcher') return '#';
-    if (url.startsWith(wpHost)) return url.replace(wpHost, '') || '/';
-    return url;
+    let resolved = url;
+    if (url.startsWith(wpHost)) {
+        resolved = url.replace(wpHost, '') || '/';
+    }
+    // Strip trailing slash (except for root path)
+    if (resolved !== '/' && resolved.endsWith('/')) {
+        resolved = resolved.slice(0, -1);
+    }
+    return resolved;
 }
 
 function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
