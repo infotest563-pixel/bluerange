@@ -75,13 +75,28 @@ export default async function DesignedHomepage({ page }: { page: any }) {
         return '';
     };
 
+    const lang = await import('../lib/wp').then(m => m.getLang());
+
     const resolveUrl = (url: string) => {
         const WP_HOST = 'https://dev-bluerange.pantheonsite.io';
-        if (!url) return '#';
+        if (!url || url === '#') return '#';
+        let resolved = url;
         if (url.startsWith(WP_HOST)) {
-            return url.replace(WP_HOST, '') || '/';
+            resolved = url.replace(WP_HOST, '') || '/';
         }
-        return url;
+
+        // Prepend lang if not present
+        const validLangs = ['en', 'sv'];
+        const segments = resolved.split('/').filter(Boolean);
+        if (segments.length === 0 || !validLangs.includes(segments[0])) {
+            resolved = `/${lang}${resolved === '/' ? '' : resolved}`;
+        }
+
+        // Strip trailing slash
+        if (resolved !== '/' && resolved.endsWith('/')) {
+            resolved = resolved.slice(0, -1);
+        }
+        return resolved;
     };
 
     //return (
