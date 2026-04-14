@@ -2,7 +2,7 @@ import { cookies, headers } from 'next/headers';
 
 const WP = 'https://dev-bluerange.pantheonsite.io';
 
-async function getLang(): Promise<string> {
+export async function getLang(): Promise<string> {
     try {
         const headerList = await headers();
         const headerLang = headerList.get('x-lang');
