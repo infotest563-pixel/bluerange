@@ -2,6 +2,8 @@ import { getPageBySlug, getPostBySlug, getSettingsWithLang } from '../../../lib/
 import { redirect, notFound } from 'next/navigation';
 import WordPressPageRenderer from '../../../components/pages/WordPressPageRenderer';
 
+export const dynamic = 'force-dynamic';
+
 const VALID_LANGS = ['en', 'sv'];
 
 export default async function LangSlugPage({
