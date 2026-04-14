@@ -58,7 +58,23 @@ export default function LanguageSwitcher() {
         setCookie('lang', lang.slug);
         setCurrent(lang.slug);
         setOpen(false);
-        window.location.reload();
+        
+        // Navigate to the language-specific URL
+        const currentPath = window.location.pathname;
+        
+        // If already on a /[lang]/ route, replace the lang segment
+        if (currentPath.match(/^\/(en|sv)\//)) {
+            const newPath = currentPath.replace(/^\/(en|sv)\//, `/${lang.slug}/`);
+            window.location.href = newPath;
+        } 
+        // If on root, go to /[lang]
+        else if (currentPath === '/') {
+            window.location.href = `/${lang.slug}`;
+        } 
+        // If on /[slug], prepend the lang
+        else {
+            window.location.href = `/${lang.slug}${currentPath}`;
+        }
     };
 
     const activeLang = langs.find(l => l.slug === current) || langs[0];
