@@ -94,7 +94,7 @@ export default function LanguageSwitcher() {
                     alt={activeLang.name}
                     style={{ display: 'block' }}
                 />
-                <span style={{ color: '#fff', fontSize: '11px' }}>▼</span>
+                {/* <span style={{ color: '#fff', fontSize: '11px' }}>▼</span> */}
             </button>
 
             {/* Dropdown */}
