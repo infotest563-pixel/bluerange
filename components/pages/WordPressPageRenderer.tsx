@@ -30,12 +30,16 @@ export default function WordPressPageRenderer({ page }: { page: any }) {
     // Route to specific template components based on slug
     switch (slug) {
         case 'virtual-server':
+        case 'virtuell-server': // Swedish
             return <VirtualServer page={page} />;
         case 'co-location':
+        case 'samlokalisering': // Swedish
             return <CoLocation page={page} />;
         case 's3-storage':
+        case 'lagring': // Swedish
             return <S3Storage page={page} />;
         case 'backup':
+        case 'sakerhetskopiering': // Swedish
             return <Backup page={page} />;
         case 'infrastructure-as-a-service':
             return <InfrastructureAsAService page={page} />;
