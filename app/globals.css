@@ -71,7 +71,7 @@ padding: 15px 15px Important;
 } */
 
 
-.deskside-inner i {
+.deskside-inner active .deskside-inner i {
 padding: 10px 12px Important;
     background: var(--br-blue);
     line-height: 16px;
