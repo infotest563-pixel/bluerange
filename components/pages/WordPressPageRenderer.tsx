@@ -21,6 +21,7 @@ import ContactUs from '../templates/ContactUs';
 import News from '../templates/News';
 import Products from '../templates/Products';
 import Services from '../templates/Services';
+import { stripCF7Forms } from '../../lib/wp';
 
 
 export default function WordPressPageRenderer({ page }: { page: any }) {
@@ -99,7 +100,7 @@ export default function WordPressPageRenderer({ page }: { page: any }) {
                         </header>
                         <div className="entry-content">
                             <div className="container">
-                                <div dangerouslySetInnerHTML={{ __html: page.content.rendered }} />
+                                <div dangerouslySetInnerHTML={{ __html: stripCF7Forms(page.content.rendered) }} />
                             </div>
                         </div>
                     </article>
