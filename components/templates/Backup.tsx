@@ -125,16 +125,16 @@ export default async function Backup({ page }: { page: any }) {
                                 <CF7Form
                                     formId={947}
                                     unitTag="wpcf7-f947-o1"
-                                    submitLabel="Submit Request"
+                                    submitLabel="Submit Amount"
                                     fields={[
                                         { name: 'text-201', type: 'text', placeholder: 'First Name', required: true, half: true },
                                         { name: 'text-202', type: 'text', placeholder: 'Last Name', required: true, half: true },
                                         { name: 'text-203', type: 'email', placeholder: 'Email Address', required: true, half: true },
                                         { name: 'number-204', type: 'tel', placeholder: 'Phone Number', required: true, half: true },
                                         { name: 'text-205', type: 'text', placeholder: 'Company Name', required: true },
-                                        { name: 'dropdown-206', type: 'select', placeholder: 'Storage Unit', required: true, options: ['GB', 'TB'] },
-                                        { name: 'number-207', type: 'text', placeholder: 'Storage Amount', required: true },
-                                        { name: 'textarea-208', type: 'textarea', placeholder: 'Message', required: false },
+                                        { name: 'dropdown-206', type: 'select', placeholder: 'Storage Unit', required: true, options: ['Select Amount GB/TB', 'GB', 'TB'] },
+                                        { name: 'number-207', type: 'text', placeholder: 'Your Storage Amount', required: true },
+                                        { name: 'textarea-208', type: 'textarea', placeholder: 'Additional Notes', required: false },
                                     ]}
                                 />
                             </div>

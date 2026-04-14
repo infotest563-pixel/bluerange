@@ -57,35 +57,31 @@ export default function CF7Form({ formId, unitTag, submitLabel = 'Submit Request
 
         const body = new FormData();
         
+        // Add all form fields
         fieldNames.forEach((name: string) => {
-            const value = values[name] || '';
-            console.log('Adding field:', name, '=', value);
-            body.append(name, value);
+            body.append(name, values[name] || '');
         });
-
-        console.log('Submitting to /api/cf7/' + formId);
 
         try {
             const res = await fetch(`/api/cf7/${formId}`, { method: 'POST', body });
             const json = await res.json();
-            console.log('Response from API:', json);
             
             if (json.status === 'mail_sent') {
                 setStatus('success');
-                setMessage(json.message || 'Thank you! Your message has been sent.');
+                setMessage(json.message || 'Thank you for your message. It has been sent.');
                 const cleared: Record<string, string> = {};
                 fieldNames.forEach((n: string) => { cleared[n] = ''; });
                 setValues(cleared);
                 setTimeout(() => setStatus('idle'), 6000);
             } else {
                 setStatus('error');
-                setMessage(json.message || 'Please fill in all required fields.');
+                setMessage(json.message || 'There was an error submitting the form. Please try again.');
                 setTimeout(() => setStatus('idle'), 5000);
             }
         } catch (err) {
-            console.error('Submit error:', err);
             setStatus('error');
             setMessage('Network error. Please try again.');
+            setTimeout(() => setStatus('idle'), 5000);
         }
     };
 
