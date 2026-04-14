@@ -16,26 +16,18 @@ export default async function LangSlugPage({
         notFound();
     }
 
-    if (slug === 'home') {
-        redirect('/');
-    }
-
     const settings = await getSettingsWithLang(lang);
 
-    let data = await getPageBySlugWithLang(slug, lang);
+    let data = await getPageBySlug(slug, lang);
     let type = 'page';
 
     if (!data) {
-        data = await getPostBySlugWithLang(slug, lang);
+        data = await getPostBySlug(slug, lang);
         type = 'post';
     }
 
     if (!data) {
         notFound();
-    }
-
-    if (type === 'page' && data.id === settings?.page_on_front) {
-        redirect('/');
     }
 
     if (type === 'page') {
