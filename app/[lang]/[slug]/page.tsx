@@ -1,4 +1,4 @@
-import { getPageBySlugWithLang, getPostBySlugWithLang, getSettingsWithLang } from '../../../lib/wp';
+import { getPageBySlug, getPostBySlug, getSettingsWithLang } from '../../../lib/wp';
 import { redirect, notFound } from 'next/navigation';
 import WordPressPageRenderer from '../../../components/pages/WordPressPageRenderer';
 
