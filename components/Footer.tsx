@@ -1,17 +1,18 @@
 import Link from 'next/link';
-import { getMenu, getSettings } from '../lib/wp';
+import { getMenu, getSettings, getLang } from '../lib/wp';
 
 const WP_HOST = 'https://dev-bluerange.pantheonsite.io';
 
 export default async function Footer() {
-    const settings = await getSettings();
+    const lang = await getLang();
+    const settings = await getSettings(lang);
     const options = settings?.options || {};
     const formHtml = settings?.footer_form_html || '';
 
     const [menuServices, menuAbout, menuInsight] = await Promise.all([
-        getMenu('OUR SERVICES').catch(() => null),
-        getMenu('ABOUT').catch(() => null),
-        getMenu('INSIGHT').catch(() => null)
+        getMenu('OUR SERVICES', lang).catch(() => null),
+        getMenu('ABOUT', lang).catch(() => null),
+        getMenu('INSIGHT', lang).catch(() => null)
     ]);
 
     const resolveUrl = (url: string) => {
