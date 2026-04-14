@@ -53,9 +53,13 @@ export async function getSite() {
 
 export async function getPageById(id: number) {
     const lang = await getLang();
-    return fetch(`${WP}/wp-json/wp/v2/pages/${id}?_embed&lang=${lang}&acf_format=standard`, {
+    const data = await fetch(`${WP}/wp-json/wp/v2/pages/${id}?_embed&lang=${lang}&acf_format=standard`, {
         next: { revalidate: 60 },
     } as RequestInit).then(r => r.json());
+    if (data?.content?.rendered) {
+        data.content.rendered = stripCF7Forms(data.content.rendered);
+    }
+    return data;
 }
 
 export async function getMedia(id: number) {
@@ -71,7 +75,19 @@ export async function getPageBySlug(slug: string) {
         next: { revalidate: 60 },
     } as RequestInit);
     const data = await res.json();
-    return data[0] || null;
+    const page = data[0] || null;
+    if (page?.content?.rendered) {
+        page.content.rendered = stripCF7Forms(page.content.rendered);
+    }
+    // Also strip from ACF fields that might contain shortcode HTML
+    if (page?.acf) {
+        for (const key of Object.keys(page.acf)) {
+            if (typeof page.acf[key] === 'string') {
+                page.acf[key] = stripCF7Forms(page.acf[key]);
+            }
+        }
+    }
+    return page;
 }
 
 export async function getPostBySlug(slug: string) {
@@ -142,7 +158,14 @@ export async function getPageBySlugWithLang(slug: string, lang: string) {
         { next: { revalidate: 60 } } as RequestInit
     );
     const data = await res.json();
-    return data[0] || null;
+    const page = data[0] || null;
+    if (page?.content?.rendered) page.content.rendered = stripCF7Forms(page.content.rendered);
+    if (page?.acf) {
+        for (const key of Object.keys(page.acf)) {
+            if (typeof page.acf[key] === 'string') page.acf[key] = stripCF7Forms(page.acf[key]);
+        }
+    }
+    return page;
 }
 
 export async function getPostBySlugWithLang(slug: string, lang: string) {
