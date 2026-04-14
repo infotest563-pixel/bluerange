@@ -114,14 +114,19 @@ export default function WordPressPageRenderer({ page }: { page: any }) {
         case 'sakerhetskopiering': // Swedish
             return <Backup page={page} />;
         case 'infrastructure-as-a-service':
+        case 'infrastruktur-som-en-tjanst': // Swedish
             return <InfrastructureAsAService page={page} />;
         case 'software-hosting-as-a-service':
+        case 'mjukvaruhotell-som-en-tjanst': // Swedish
             return <SoftwareHostingAsAService page={page} />;
         case 'software-entrepreneurs':
+        case 'mjukvaruforetag': // Swedish
             return <SoftwareEntrepreneurs page={page} />;
         case 'our-partners':
+        case 'vara-partners': // Swedish
             return <OurPartners page={page} />;
         case 'microsoft-365':
+        case 'microsoft-365-2': // Swedish variant
             return <Microsoft365 page={page} />;
         case 'web-hotel': // Ensure this matches the slug. The file is web-hotel.php but slug might be web-hosting or web-hotel. 
             // Best to cover both or assume slug matches filename broadly.
@@ -130,8 +135,10 @@ export default function WordPressPageRenderer({ page }: { page: any }) {
         case 'web-hosting': // Alias just in case
             return <WebHotel page={page} />;
         case 'domains':
+        case 'domaner': // Swedish
             return <Domains page={page} />;
         case 'broadband':
+        case 'bredband': // Swedish
             return <Broadband page={page} />;
         case 'crowdsec':
             return <Crowdsec page={page} />;
@@ -140,6 +147,7 @@ export default function WordPressPageRenderer({ page }: { page: any }) {
         case 'security-awareness-training': // Matching corrected spelling just in case
             return <SecurityAwarenessTraining page={page} />;
         case 'public-sector':
+        case 'offentlig-sektor': // Swedish
             return <PublicSector page={page} />;
         case 'about-bluerange': // User specified slug
             return <About page={page} />;
