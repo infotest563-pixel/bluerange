@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { getMedia, renderShortcode } from '../../lib/wp';
+import { getMedia } from '../../lib/wp';
+import CF7Form from '../CF7Form';
 
 const WP_HOST = 'https://dev-bluerange.pantheonsite.io';
 
@@ -23,10 +24,6 @@ export default async function CoLocation({ page }: { page: any }) {
         ...row,
         imgUrl: await resolveImage(row.trust_features_icons)
     })));
-
-    // Shortcode
-    // En: [contact-form-7 id="cbbde7a" title="Colocation- Request will be answered"]
-    const shortcodeHtml = await renderShortcode('[contact-form-7 id="cbbde7a" title="Colocation- Request will be answered"]');
 
     return (
         <div className="co-location-template">
@@ -87,7 +84,18 @@ export default async function CoLocation({ page }: { page: any }) {
                                 <h2>Request will be answered within 24 hours</h2>
                             </div>
                             <div className="wd-100">
-                                <div dangerouslySetInnerHTML={{ __html: shortcodeHtml }} suppressHydrationWarning />
+                                <CF7Form
+                                    formId={948}
+                                    unitTag="wpcf7-f948-o1"
+                                    fields={[
+                                        { name: 'first-name', type: 'text', placeholder: 'First Name', required: true, half: true },
+                                        { name: 'last-name', type: 'text', placeholder: 'Last Name', required: true, half: true },
+                                        { name: 'email', type: 'email', placeholder: 'Email', required: true },
+                                        { name: 'company', type: 'text', placeholder: 'Company', required: false },
+                                        { name: 'your-message', type: 'textarea', placeholder: 'Message', required: false },
+                                    ]}
+                                    submitLabel="Submit Request"
+                                />
                             </div>
                         </div>
                     </div>
