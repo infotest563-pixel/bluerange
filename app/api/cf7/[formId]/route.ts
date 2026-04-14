@@ -2,36 +2,56 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const WP = 'https://dev-bluerange.pantheonsite.io';
 
-// GET: fetch real field names from WP rendered CF7 form HTML
+// Map of numeric CFDB7 form IDs to their CF7 GUID and ACF field info
+const FORM_MAP: Record<string, { guid: string; slug: string; acfField: string }> = {
+    '947': { guid: '8e88d3b',  slug: 'backup',                      acfField: 'storage_request_form_shortcode' },
+    '948': { guid: 'cbbde7a',  slug: 'co-location',                  acfField: 'colc_form_shortcode' },
+    '955': { guid: '1465da7',  slug: 's3-storage',                   acfField: 'colc_form_shortcode' },
+    '957': { guid: 'b990f59',  slug: 'career',                       acfField: 'career_form_shortcode' },
+    '943': { guid: 'b8c2759',  slug: 'public-sector',                acfField: 'metting_form_shortcode' },
+    '944': { guid: '',         slug: 'software-hosting-as-a-service', acfField: 'get_a_quote_form' },
+    '70':  { guid: '',         slug: 'contact-us',                   acfField: 'contact_form' },
+    '282': { guid: '',         slug: 'service',                      acfField: 'services_questions_shortcode' },
+};
+
+async function fetchFormHtml(formId: string): Promise<string> {
+    const info = FORM_MAP[formId];
+    const guid = info?.guid;
+
+    // Use GUID if available, otherwise numeric ID
+    const shortcodeId = guid || formId;
+    const code = `[contact-form-7 id="${shortcodeId}"]`;
+
+    const res = await fetch(`${WP}/wp-json/headless/v1/shortcode`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+    });
+
+    if (!res.ok) return '';
+
+    const raw = await res.text();
+    try {
+        const parsed = JSON.parse(raw);
+        if (typeof parsed === 'string') return parsed;
+        if (parsed?.html) return parsed.html;
+        if (parsed?.data) return parsed.data;
+        return raw;
+    } catch {
+        return raw;
+    }
+}
+
+// GET: return real field names extracted from WP rendered form HTML
 export async function GET(
     _req: NextRequest,
     { params }: { params: Promise<{ formId: string }> }
 ) {
     const { formId } = await params;
     try {
-        const res = await fetch(`${WP}/wp-json/headless/v1/shortcode`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code: `[contact-form-7 id="${formId}"]` }),
-        });
+        const html = await fetchFormHtml(formId);
+        if (!html) return NextResponse.json({ fields: [] });
 
-        if (!res.ok) return NextResponse.json({ fields: [] });
-
-        // The endpoint returns JSON — extract the html string from it
-        const raw = await res.text();
-        let html = '';
-        try {
-            const parsed = JSON.parse(raw);
-            // Could be string, or { html: '...' }, or { data: '...' }
-            if (typeof parsed === 'string') html = parsed;
-            else if (parsed?.html) html = parsed.html;
-            else if (parsed?.data) html = parsed.data;
-            else html = raw;
-        } catch {
-            html = raw;
-        }
-
-        // Extract name attributes from input/textarea/select — skip hidden CF7 fields
         const nameMatches = [...html.matchAll(/name="([^"]+)"/g)];
         const fields = [...new Set(
             nameMatches
@@ -39,27 +59,13 @@ export async function GET(
                 .filter((n: string) => !n.startsWith('_wpcf7') && !n.startsWith('g-recaptcha'))
         )];
 
-        if (fields.length === 0) {
-            // Fallback: try fetching form structure from CF7 REST API
-            const cfRes = await fetch(`${WP}/wp-json/contact-form-7/v1/contact-forms/${formId}`, {
-                headers: { 'Accept': 'application/json' },
-            }).catch(() => null);
-            if (cfRes?.ok) {
-                const cfData = await cfRes.json();
-                // Extract field tags from form body
-                const tagMatches = [...(cfData?.properties?.form?.body || '').matchAll(/\[[\w-]+\s+([^\s\]]+)/g)];
-                const tagFields = tagMatches.map((m: RegExpMatchArray) => m[1]).filter((n: string) => n && !n.startsWith('_'));
-                return NextResponse.json({ fields: [...new Set(tagFields)] });
-            }
-        }
-
         return NextResponse.json({ fields });
     } catch {
         return NextResponse.json({ fields: [] });
     }
 }
 
-// POST: proxy submission directly to WP CF7 REST API
+// POST: proxy submission to WP CF7 REST API
 export async function POST(
     req: NextRequest,
     { params }: { params: Promise<{ formId: string }> }
@@ -68,7 +74,6 @@ export async function POST(
     try {
         const incoming = await req.formData();
 
-        // Build a clean FormData with all required CF7 hidden fields
         const body = new FormData();
         body.append('_wpcf7', formId);
         body.append('_wpcf7_version', '6.1.3');
@@ -77,7 +82,6 @@ export async function POST(
         body.append('_wpcf7_container_post', '0');
         body.append('_wpcf7_posted_data_hash', '');
 
-        // Copy all user-submitted fields
         for (const [key, value] of incoming.entries()) {
             if (!key.startsWith('_wpcf7')) {
                 body.append(key, value);
