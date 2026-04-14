@@ -56,9 +56,9 @@ export default async function Backup({ page }: { page: any }) {
                     <div className="row str-backup-inner">
                         <div className="bl-box col-sm-12 col-md-12">
                             <div className="wd-100">
-                                {acf.banner_content && <div dangerouslySetInnerHTML={{ __html: acf.banner_content }} />}
-                                {acf.banner_subcontent && <div dangerouslySetInnerHTML={{ __html: acf.banner_subcontent }} />}
-                                {acf.banner_subcontents && <div dangerouslySetInnerHTML={{ __html: acf.banner_subcontents }} />}
+                                {acf.banner_content && <div dangerouslySetInnerHTML={{ __html: stripCF7Forms(acf.banner_content) }} />}
+                                {acf.banner_subcontent && <div dangerouslySetInnerHTML={{ __html: stripCF7Forms(acf.banner_subcontent) }} />}
+                                {acf.banner_subcontents && <div dangerouslySetInnerHTML={{ __html: stripCF7Forms(acf.banner_subcontents) }} />}
                             </div>
                         </div>
                     </div>
