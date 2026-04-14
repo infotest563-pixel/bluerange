@@ -64,6 +64,9 @@ export default async function Header() {
                                             <span>Support@bluerange.se</span>
                                         </a>
                                     </li>
+                                    <li>
+                                        <LanguageSwitcher />
+                                    </li>
                                 </ul>
                             </div>
                         </div>

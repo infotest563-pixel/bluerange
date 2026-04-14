@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import LanguageSwitcher from './LanguageSwitcher';
 
 interface MenuItem {
     id: string | number;
@@ -54,11 +53,7 @@ function DropdownItem({ item, wpHost }: { item: MenuItem; wpHost: string }) {
 
     // Replace Polylang switcher with our own component
     if (isLangSwitcher(item)) {
-        return (
-            <li className="nav-item">
-                <LanguageSwitcher />
-            </li>
-        );
+        return null;
     }
 
     const liClasses = ['nav-item', ...(item.classes || [])];
