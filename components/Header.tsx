@@ -99,11 +99,11 @@ export default async function Header() {
                                 <span>{siteData?.name || 'Bluerange'}</span>
                             )}
 
-<li>
+                        </Link>
+
+                        <li>
     <LanguageSwitcher />
 </li>
-
-                        </Link>
 
                         <NavMenu
                             menuItems={menuItems}
