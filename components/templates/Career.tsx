@@ -156,14 +156,6 @@ export default async function Career({ page }: { page: any }) {
                                 <CF7Form
                                     formId={957}
                                     unitTag="wpcf7-f957-o1"
-                                    fields={[
-                                        { name: 'first-name', type: 'text', placeholder: 'First Name', required: true, half: true },
-                                        { name: 'last-name', type: 'text', placeholder: 'Last Name', required: true, half: true },
-                                        { name: 'email', type: 'email', placeholder: 'Email Address', required: true, half: true },
-                                        { name: 'phone', type: 'tel', placeholder: 'Phone Number', required: false, half: true },
-                                        { name: 'position', type: 'text', placeholder: 'Position Applied For', required: false },
-                                        { name: 'your-message', type: 'textarea', placeholder: 'Cover Letter / Message', required: false },
-                                    ]}
                                     submitLabel="Apply Now"
                                 />
                             </div>

@@ -150,14 +150,6 @@ export default async function PublicSector({ page }: { page: any }) {
                                 <CF7Form
                                     formId={943}
                                     unitTag="wpcf7-f943-o1"
-                                    fields={[
-                                        { name: 'first-name', type: 'text', placeholder: 'First Name', required: true, half: true },
-                                        { name: 'last-name', type: 'text', placeholder: 'Last Name', required: true, half: true },
-                                        { name: 'email', type: 'email', placeholder: 'Email Address', required: true, half: true },
-                                        { name: 'phone', type: 'tel', placeholder: 'Phone Number', required: false, half: true },
-                                        { name: 'company', type: 'text', placeholder: 'Company Name', required: false },
-                                        { name: 'your-message', type: 'textarea', placeholder: 'Message', required: false },
-                                    ]}
                                     submitLabel="Book a Meeting"
                                 />
                             </div>

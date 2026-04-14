@@ -124,13 +124,6 @@ export default async function Services({ page }: { page: any }) {
                                 <CF7Form
                                     formId={282}
                                     unitTag="wpcf7-f282-o1"
-                                    fields={[
-                                        { name: 'first-name', type: 'text', placeholder: 'First Name', required: true, half: true },
-                                        { name: 'last-name', type: 'text', placeholder: 'Last Name', required: true, half: true },
-                                        { name: 'email', type: 'email', placeholder: 'Email Address', required: true, half: true },
-                                        { name: 'phone', type: 'tel', placeholder: 'Phone Number', required: false, half: true },
-                                        { name: 'your-message', type: 'textarea', placeholder: 'Your Question', required: false },
-                                    ]}
                                     submitLabel="Send"
                                 />
                             </div>

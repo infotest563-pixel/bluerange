@@ -111,13 +111,6 @@ export default async function SoftwareHostingAsAService({ page }: { page: any })
                                 <CF7Form
                                     formId={944}
                                     unitTag="wpcf7-f944-o1"
-                                    fields={[
-                                        { name: 'full-name', type: 'text', placeholder: 'Full Name', required: true },
-                                        { name: 'email', type: 'email', placeholder: 'Email', required: true, half: true },
-                                        { name: 'phone', type: 'tel', placeholder: 'Phone Number', required: false, half: true },
-                                        { name: 'company', type: 'text', placeholder: 'Company Name', required: false },
-                                        { name: 'your-message', type: 'textarea', placeholder: 'Message', required: false },
-                                    ]}
                                     submitLabel="Get a Quote"
                                 />
                             </div>

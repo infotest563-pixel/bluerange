@@ -1,37 +1,43 @@
 'use client';
 
-import { useState } from 'react';
-
-interface CF7Field {
-    name: string;
-    label?: string;
-    type: 'text' | 'email' | 'tel' | 'textarea' | 'select';
-    placeholder?: string;
-    required?: boolean;
-    options?: string[];
-    half?: boolean;
-}
+import { useState, useEffect } from 'react';
 
 interface CF7FormProps {
     formId: number;
     unitTag: string;
-    fields: CF7Field[];
     submitLabel?: string;
+    // Optional override fields — if not provided, fetched from WP
+    fields?: { name: string; type: string; placeholder?: string; required?: boolean; half?: boolean }[];
 }
 
-const WP = 'https://dev-bluerange.pantheonsite.io';
-
-export default function CF7Form({ formId, unitTag, fields, submitLabel = 'Submit Request' }: CF7FormProps) {
-    const [values, setValues] = useState<Record<string, string>>(() =>
-        Object.fromEntries(fields.map(f => [f.name, f.options?.[0] || '']))
-    );
+export default function CF7Form({ formId, unitTag, submitLabel = 'Submit Request', fields: overrideFields }: CF7FormProps) {
+    const [fields, setFields] = useState<string[]>([]);
+    const [values, setValues] = useState<Record<string, string>>({});
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [message, setMessage] = useState('');
+    const [ready, setReady] = useState(false);
 
-    const set = (name: string, value: string) =>
-        setValues(prev => ({ ...prev, [name]: value }));
+    useEffect(() => {
+        if (overrideFields) {
+            const names = overrideFields.map(f => f.name);
+            setFields(names);
+            setValues(Object.fromEntries(names.map(n => [n, ''])));
+            setReady(true);
+            return;
+        }
+        // Fetch real field names from WP via our API proxy
+        fetch(`/api/cf7/${formId}`)
+            .then(r => r.json())
+            .then(data => {
+                const names: string[] = data.fields || [];
+                setFields(names);
+                setValues(Object.fromEntries(names.map((n: string) => [n, ''])));
+                setReady(true);
+            })
+            .catch(() => setReady(true));
+    }, [formId, overrideFields]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setStatus('loading');
 
@@ -43,24 +49,22 @@ export default function CF7Form({ formId, unitTag, fields, submitLabel = 'Submit
         body.append('_wpcf7_container_post', '0');
         body.append('_wpcf7_posted_data_hash', '');
 
-        fields.forEach(f => {
-            body.append(f.name, values[f.name] || '');
+        fields.forEach(name => {
+            body.append(name, values[name] || '');
         });
 
         try {
-            const res = await fetch(
-                `${WP}/wp-json/contact-form-7/v1/contact-forms/${formId}/feedback`,
-                { method: 'POST', body }
-            );
+            const res = await fetch(`/api/cf7/${formId}`, { method: 'POST', body });
             const json = await res.json();
+
             if (json.status === 'mail_sent') {
                 setStatus('success');
                 setMessage(json.message || 'Thank you! Your message has been sent.');
-                setValues(Object.fromEntries(fields.map(f => [f.name, f.options?.[0] || ''])));
+                setValues(Object.fromEntries(fields.map(n => [n, ''])));
                 setTimeout(() => setStatus('idle'), 6000);
             } else {
                 setStatus('error');
-                setMessage(json.message || 'There was an error. Please try again.');
+                setMessage(json.message || 'Please fill in all required fields.');
                 setTimeout(() => setStatus('idle'), 5000);
             }
         } catch {
@@ -69,49 +73,47 @@ export default function CF7Form({ formId, unitTag, fields, submitLabel = 'Submit
         }
     };
 
+    if (!ready) return <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>Loading form...</div>;
+
     return (
         <form onSubmit={handleSubmit} className="wpcf7-form">
             <div className="row">
-                {fields.map(field => (
-                    <div key={field.name} className={field.half ? 'col-md-6' : 'col-md-12'} style={{ marginBottom: '16px' }}>
-                        {field.type === 'textarea' ? (
-                            <textarea
-                                name={field.name}
-                                placeholder={field.placeholder || field.label}
-                                required={field.required}
-                                rows={5}
-                                className="wpcf7-form-control wpcf7-textarea form-control"
-                                value={values[field.name]}
-                                onChange={e => set(field.name, e.target.value)}
-                                style={{ width: '100%' }}
-                            />
-                        ) : field.type === 'select' ? (
-                            <select
-                                name={field.name}
-                                required={field.required}
-                                className="wpcf7-form-control wpcf7-select form-control"
-                                value={values[field.name]}
-                                onChange={e => set(field.name, e.target.value)}
-                                style={{ width: '100%' }}
-                            >
-                                {field.options?.map(opt => (
-                                    <option key={opt} value={opt}>{opt}</option>
-                                ))}
-                            </select>
-                        ) : (
-                            <input
-                                type={field.type}
-                                name={field.name}
-                                placeholder={field.placeholder || field.label}
-                                required={field.required}
-                                className={`wpcf7-form-control wpcf7-${field.type} form-control`}
-                                value={values[field.name]}
-                                onChange={e => set(field.name, e.target.value)}
-                                style={{ width: '100%' }}
-                            />
-                        )}
-                    </div>
-                ))}
+                {fields.map(name => {
+                    const override = overrideFields?.find(f => f.name === name);
+                    const isTextarea = override?.type === 'textarea' || name.includes('message') || name.includes('textarea') || name.includes('text-area');
+                    const isEmail = override?.type === 'email' || name.includes('email') || name.includes('mail');
+                    const isTel = override?.type === 'tel' || name.includes('phone') || name.includes('mobile') || name.includes('tel') || name.includes('number');
+                    const isHalf = override?.half ?? false;
+                    const placeholder = override?.placeholder || name.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                    const inputType = isEmail ? 'email' : isTel ? 'tel' : 'text';
+
+                    return (
+                        <div key={name} className={isHalf ? 'col-md-6' : 'col-md-12'} style={{ marginBottom: '12px' }}>
+                            {isTextarea ? (
+                                <textarea
+                                    name={name}
+                                    placeholder={placeholder}
+                                    rows={5}
+                                    className="wpcf7-form-control wpcf7-textarea form-control"
+                                    value={values[name] || ''}
+                                    onChange={e => setValues(v => ({ ...v, [name]: e.target.value }))}
+                                    style={{ width: '100%' }}
+                                />
+                            ) : (
+                                <input
+                                    type={inputType}
+                                    name={name}
+                                    placeholder={placeholder}
+                                    required={override?.required}
+                                    className={`wpcf7-form-control wpcf7-${inputType} form-control`}
+                                    value={values[name] || ''}
+                                    onChange={e => setValues(v => ({ ...v, [name]: e.target.value }))}
+                                    style={{ width: '100%' }}
+                                />
+                            )}
+                        </div>
+                    );
+                })}
             </div>
 
             <div style={{ marginTop: '8px' }}>
@@ -126,12 +128,12 @@ export default function CF7Form({ formId, unitTag, fields, submitLabel = 'Submit
             </div>
 
             {status === 'success' && (
-                <div style={{ marginTop: '16px', padding: '12px 16px', background: '#f0fff4', border: '1px solid #46b450', borderRadius: '4px', color: '#2d6a30' }}>
+                <div className="wpcf7-response-output" style={{ marginTop: '16px', padding: '12px 16px', background: '#f0fff4', border: '1px solid #46b450', borderRadius: '4px', color: '#2d6a30' }}>
                     {message}
                 </div>
             )}
             {status === 'error' && (
-                <div style={{ marginTop: '16px', padding: '12px 16px', background: '#fff5f5', border: '1px solid #dc3232', borderRadius: '4px', color: '#9b1c1c' }}>
+                <div className="wpcf7-response-output" style={{ marginTop: '16px', padding: '12px 16px', background: '#fff5f5', border: '1px solid #dc3232', borderRadius: '4px', color: '#9b1c1c' }}>
                     {message}
                 </div>
             )}

@@ -87,13 +87,6 @@ export default async function CoLocation({ page }: { page: any }) {
                                 <CF7Form
                                     formId={948}
                                     unitTag="wpcf7-f948-o1"
-                                    fields={[
-                                        { name: 'first-name', type: 'text', placeholder: 'First Name', required: true, half: true },
-                                        { name: 'last-name', type: 'text', placeholder: 'Last Name', required: true, half: true },
-                                        { name: 'email', type: 'email', placeholder: 'Email', required: true },
-                                        { name: 'company', type: 'text', placeholder: 'Company', required: false },
-                                        { name: 'your-message', type: 'textarea', placeholder: 'Message', required: false },
-                                    ]}
                                     submitLabel="Submit Request"
                                 />
                             </div>
