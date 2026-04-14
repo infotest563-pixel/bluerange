@@ -11,9 +11,17 @@ export function middleware(request: NextRequest) {
     const langSegment = segments[1];
 
     if (VALID_LANGS.includes(langSegment)) {
-        const response = NextResponse.next();
+        // Add a header so server components can read the current lang immediately
+        const requestHeaders = new Headers(request.headers);
+        requestHeaders.set('x-lang', langSegment);
+
+        const response = NextResponse.next({
+            request: {
+                headers: requestHeaders,
+            },
+        });
         
-        // Update the 'lang' cookie if it's different
+        // Also update the 'lang' cookie for future requests
         const currentLang = request.cookies.get('lang')?.value;
         if (currentLang !== langSegment) {
             response.cookies.set('lang', langSegment, {
