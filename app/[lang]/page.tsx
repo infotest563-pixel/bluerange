@@ -1,6 +1,6 @@
 import { getSettingsWithLang, getPageById } from '../../lib/wp';
 import { notFound } from 'next/navigation';
-import WordPressPageRenderer from '../../components/pages/WordPressPageRenderer';
+import DesignedHomepage from '../../components/DesignedHomepage';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,5 +29,5 @@ export default async function LangHomePage({
         notFound();
     }
 
-    return <WordPressPageRenderer page={page} />;
+    return <DesignedHomepage page={page} />;
 }
