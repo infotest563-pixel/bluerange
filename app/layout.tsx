@@ -1,6 +1,8 @@
 import './globals.css';
 import type { ReactNode } from 'react';
 import Script from 'next/script';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +21,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <link rel="stylesheet" href="/understrap-child/style.css" />
       </head>
       <body suppressHydrationWarning={true}>
+        <Header />
         {children}
+        <Footer />
 
         <Script
           src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"
