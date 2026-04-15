@@ -1,3 +1,4 @@
+import DesignedHomepage from '../DesignedHomepage';
 import VirtualServer from '../templates/VirtualServer';
 import CoLocation from '../templates/CoLocation';
 import S3Storage from '../templates/S3Storage';
@@ -27,6 +28,16 @@ import { stripCF7Forms } from '../../lib/wp';
 export default function WordPressPageRenderer({ page }: { page: any }) {
     const slug = page.slug;
     const template = page.template || '';
+
+    // Homepage: slug is 'home' or template includes 'home' or front-page
+    if (
+        slug === 'home' ||
+        slug === 'hem' || // Swedish: 'home'
+        template.includes('front-page') ||
+        template.includes('home')
+    ) {
+        return <DesignedHomepage page={page} />;
+    }
 
     // Route by template first (more reliable for multi-language)
     if (template.includes('virtual-server')) {
