@@ -49,6 +49,7 @@ export default async function About({ page }: { page: any }) {
                 <div className="container">
                     <div className="row ab-custmer-inner align-items-center md-revers">
                         <div className="bl-box col-sm-12 col-md-12 col-lg-6 ab-cstrtx">
+                        
                             <div className="wd-100">
                                 {acf.right_image_title && <h2>{acf.right_image_title}</h2>}
                                 {acf.right_image_content && <div dangerouslySetInnerHTML={{ __html: acf.right_image_content }} />}
